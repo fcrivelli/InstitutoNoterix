@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Proyecto</title>
+    <!--CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!--Export Awesome items CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--NAV bar CSS-->
+    <link rel="stylesheet" href="navBar.css">
+
+    <!-- Firebase -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-database.js"></script>
+    <script src="firebase-app.js"></script>
+    <script src="./firebase"></script>
+    <script data-main="scripts/app" src="scripts/require.js"></script>
+
+
+    <!--Java Script-->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="carga-cursos.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!--Data Table JS-->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap.min.js"></script>
+
+    <!--Data table CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap.min.css">
+</head>
+
+<body>
+    <header>
+        <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+            <div class="position-sticky">
+                <div class="list-group list-group-flush mx-3 mt-4">
+                    <a href="index.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Cursos</span></a>
+                    <a href="alumnos.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Alumnos</span></a>
+                    <a href="profesores.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Profesores</span></a>
+                </div>
+            </div>
+        </nav>
+
+        <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="#">
+                    <img src="https://mdbootstrap.com/img/logo/mdb-transaprent-noshadows.png" height="25" alt="" loading="lazy" />
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="margin-top: 58px;">
+        <div class="container pt-4">
+            <section id="content">
+                <section class="scrollable wrapper">
+                    <div class="tab-content">
+                        <section class="panel hbox stretch">
+                            <div class="row" id="HideShowForm" class="hideable">
+                                <div class="col-md-6">
+                                    <button id="BtnHideShowForm" class="btn btn-primary">Crear Curso</button>
+                                </div>
+                            </div>
+
+                            <div class="row" id="FormInput" class="hideable">
+                                <div class="col-md-6">
+                                    <div class="col-md-8 center-block">
+                                        <div>&nbsp;</div>
+                                        <div class="form-group input-icon">
+                                            <label>Nombre: </label>
+                                            <input type="text" id="CourseCb" class="form-control" name="CursoId" data-live-search="true">
+                                        </div>
+                                        <div class="form-group input-icon">
+                                            <label>Profesor Titular: </label>
+                                            <select id="MainTeacherCb" class="form-control" name="MainTeacherId" data-live-search="true">
+                                                <option>Seleccionar Profesor</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group input-icon">
+                                            <label>Ayudante: </label>
+                                            <select id="SecondTeacherCb" class="form-control" name="SecondTeacherId" data-live-search="true">
+                                                <option>Seleccionar Ayudante</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group input-icon">
+                                            <label>Fecha: </label>
+                                            <input type="date" id="DateTb" class="form-control" />
+                                        </div>
+
+                                        <div>
+                                            <input type="checkbox" name="DefaultValue" value="true" id="ActiveChb" />
+                                            <label>Is Active</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="col-md-8 center-block">
+                                        <div>&nbsp;</div>
+                                        <div class="form-group input-icon">
+                                            <label>Tipo de cursada:</label>
+                                            <select id="TypeCourseCb" class="form-control">
+                                                        <option value="1">Online</option>
+                                                        <option value="2">Presencial</option>
+                                                    </select>
+                                        </div>
+
+                                        <div class="form-group input-icon">
+                                            <label>Cantidad Días:</label>
+                                            <input class="form-control" type="number" id="AmountDaysDp" />
+                                        </div>
+
+                                        <div class="form-group input-icon">
+                                            <label>Cupos:</label>
+                                            <input class="form-control" type="number" id="AmountVacanciesDp" />
+                                        </div>
+
+                                        <div class="form-group input-icon">
+                                            <label>Hora:</label>
+                                            <input class="form-control" type="number" id="HourDp" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row form-group" id="BtnSaveCancel" class="hideable">
+                                <div class="pull-right col-md-8">
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-success" id="saveButton">Guardar</button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-default" id="cancelButton">Cancelar</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row" id="Container">
+                                <div>&nbsp;</div>
+                                <div class="table-responsive" width="100%" style="overflow:auto;">
+                                    <table class="table table-bordered focus table-minified" with="auto" id="CoursesTable">
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Alumnos Cursando: </label><input type="number" id="ValueStudents" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Precio Promedio: </label><input type="number" id="ValuePromPrecie" readonly>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>

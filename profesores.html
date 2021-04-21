@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Proyecto</title>
+    <!--CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!--Export Awesome items CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--NAV bar CSS-->
+    <link rel="stylesheet" href="navBar.css">
+
+    <!-- Firebase -->
+    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+
+    <!--Java Script-->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="carga-profesores.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!--Data Table JS-->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap.min.js"></script>
+
+    <!--Data table CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap.min.css">
+</head>
+
+<body>
+    <header>
+        <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+            <div class="position-sticky">
+                <div class="list-group list-group-flush mx-3 mt-4">
+                    <a href="index.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Cursos</span></a>
+                    <a href="alumnos.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Alumnos</span></a>
+                    <a href="profesores.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Profesores</span></a>
+                </div>
+            </div>
+        </nav>
+
+        <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+                </button>
+                <a class="navbar-brand" href="#">
+                    <img src="https://mdbootstrap.com/img/logo/mdb-transaprent-noshadows.png" height="25" alt="" loading="lazy" />
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="margin-top: 58px;">
+        <div class="container pt-4">
+            <section id="content">
+                <section class="scrollable wrapper">
+                    <div class="tab-content">
+                        <section class="panel hbox stretch">
+                            <div class="row" id="HideShowForm" class="hideable">
+                                <div class="col-md-6">
+                                    <button id="BtnHideShowForm" class="btn btn-primary">Crear Curso</button>
+                                </div>
+                            </div>
+
+                            <div class="row" id="FormInput" class="hideable">
+                                <div class="col-md-6">
+                                    <div class="col-md-8 center-block">
+                                        <div>&nbsp;</div>
+                                        <div class="form-group input-icon">
+                                            <label>Nombre: </label>
+                                            <input type="text" id="NameTeacherCb" class="form-control" name="NombreId" data-live-search="true">
+                                        </div>
+                                        <div class="form-group input-icon">
+                                            <label>Apellido: </label>
+                                            <input type="text" id="LastNameTeacherCb" class="form-control" name="ApellidoId" data-live-search="true">
+                                        </div>
+                                        <div class="form-group input-icon">
+                                            <label>Edad: </label>
+                                            <input type="number" id="AgeCb" class="form-control" name="AgeId" data-live-search="true">
+                                        </div>
+                                        <div class="form-group input-icon">
+                                            <label>Título: </label>
+                                            <input type="text" id="DegreeCb" class="form-control" name="DegreeId" data-live-search="true">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="col-md-8 center-block">
+                                        <div>&nbsp;</div>
+                                        <div class="form-group input-icon">
+                                            <label>Elegir Curso:</label>
+                                            <select name="selectedCursos" id="NameCourseCb" class="form-control"> 
+                                                <option>Seleccionar Curso</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group input-icon">
+                                            <label>Email:</label>
+                                            <input type="email" class="form-control" id="EmailCb" />
+                                        </div>
+                                        <div class="form-group input-icon">
+                                            <label>Dni:</label>
+                                            <input class="form-control" type="number" id="DniCb" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row form-group" id="BtnSaveCancel" class="hideable">
+                                <div class="pull-right col-md-8">
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-success" id="saveButton">Guardar</button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-default" id="cancelButton">Cancelar</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row" id="Container">
+                                <div>&nbsp;</div>
+                                <div class="table-responsive" width="100%" style="overflow:auto;">
+                                    <table class="table table-bordered focus table-minified" with="auto" id="TeachersTable">
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>
