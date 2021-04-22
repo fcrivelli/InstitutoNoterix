@@ -11,17 +11,21 @@
     <link rel="stylesheet" href="navBar.css">
 
     <!-- Firebase -->
-    <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
-    <!-- TODO: Add SDKs for Firebase products that you want to use
-        https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-database.js"></script>
-    <script src="firebase-app.js"></script>
-    <script src="./firebase"></script>
-    <script data-main="scripts/app" src="scripts/require.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-database.js"></script>
+    <script>
+        // Firebase App (the core Firebase SDK) is always required and must be listed first
+        import firebase from "firebase/app";
+        // If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
+        // import * as firebase from "firebase/app"
+        // If you enabled Analytics in your project, add the Firebase SDK for Analytics
+        import "firebase/analytics";
+        // Add the Firebase products that you want to use
+        import "firebase/auth";
+        import "firebase/firestore";
+    </script>
 
     <!--Java Script-->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>

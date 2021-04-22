@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/fcrivelli/institutonoterix/issues"
   },
-  "homepage": "https://github.com/fcrivelli/institutonoterix#readme"
+  "homepage": "https://github.com/fcrivelli/institutonoterix#readme",
+  "dependencies": {
+    "firebase": "^8.4.1"
+  }
 }

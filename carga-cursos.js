@@ -1,24 +1,5 @@
 const precieHour = 150;
-var dataInt;
 var courseList = [];
-var firebase;
-
-/* Intento generar un sistema de observers y notificaciones para cargar las listas relacionadas */
-class Observable {
-    constructor() {
-        this.observerList = [];
-    }
-    add(Observer) {
-        this.observerList.push(Observer)
-    }
-    remove() {
-
-    }
-    upsert() {
-
-    }
-}
-window.observable = new Observable();
 
 /* Objeto a utilizar como curso */
 class Course {
@@ -45,7 +26,7 @@ class Course {
         let id = 0;
         for (const course of courseList) {
             if (parseInt(course.id) > id) {
-                id = course.id;
+                id = parseInt(course.id);
             }
         }
         return (id + 1);
@@ -71,6 +52,8 @@ var chargeCourse = (function() {
     var BTN_HIDE_SHOW_FORM = '#BtnHideShowForm';
     var BTN_SUCCESS = '#saveButton';
     var BTN_CANCEL = '#cancelButton';
+    var SELECT_MAIN_TEACHER = '#MainTeacherCb';
+    var SELECT_SECOND_TEACHER = '#SecondTeacherCb';
     var TABLE_ID = '#CoursesTable';
     var CONTAINER = '#Container';
     var ADD_COURSE = 'AGREGAR +';
@@ -78,7 +61,6 @@ var chargeCourse = (function() {
     var courseIdToEdit = "";
     var GET_DATA_FIREBASE_URL = 'https://institutonoterix-default-rtdb.firebaseio.com/.json';
     var table;
-    var refCources;
 
     $(document).ready(function() {
         init();
@@ -93,30 +75,27 @@ var chargeCourse = (function() {
 
     /* Inicializo Firebase */
     var initFirebase = function() {
-        firebase = require('firebase/app');
-        require('firebase/auth');
-        require('firebase/database');
         // Your web app's Firebase configuration
         // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         var firebaseConfig = {
             apiKey: "AIzaSyBMWlxH-4dlOlXhqCq6VMgu4ZWchaw1f7c",
             authDomain: "institutonoterix.firebaseapp.com",
             databaseURL: "https://institutonoterix-default-rtdb.firebaseio.com",
-            //    projectId: "institutonoterix",
+            projectId: "institutonoterix",
             storageBucket: "institutonoterix.appspot.com",
-            //    messagingSenderId: "638778265851",
-            //     appId: "1:638778265851:web:4a3b43d4bd0d461743205e",
-            //    measurementId: "G-YYR5S8WP87"
+            messagingSenderId: "638778265851",
+            appId: "1:638778265851:web:4a3b43d4bd0d461743205e",
+            measurementId: "G-YYR5S8WP87"
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        var database = firebase.database();
     }
 
     /* Formulario */
     /* Inicializo Formulario y botones de formulario */
     var initForm = function() {
         showAndHideForm('none', 'block', ADD_COURSE);
+        chargeSelectsForm();
         $(BTN_HIDE_SHOW_FORM).on('click', function() {
             btnHideShowForm();
         });
@@ -128,6 +107,31 @@ var chargeCourse = (function() {
                 saveCourse();
             }
         });
+    }
+
+    var chargeSelectsForm = function(){
+        firebase.database().ref(`profesores`).on('value', function(data) {
+            chargeSelect($(SELECT_MAIN_TEACHER)[0], generateArray(data.val()));
+            chargeSelect($(SELECT_SECOND_TEACHER)[0], generateArray(data.val()));
+        });
+    }
+
+    /* Generar un array desde un mapa */
+    var generateArray = function(dataArray){
+        var array = new Array();
+        for (var value of dataArray){
+            array.push(value.name + " " + value.lastName);
+        }
+        return array;
+    }
+
+    /* Cargar un elemento select */
+    var chargeSelect = function(select, array){
+        for(var i=0;i<array.length;i++){
+            var option = document.createElement("option");
+            option.text = array[i]; 
+            select.add(option);
+        }
     }
 
     /* Muestro y Oculto el formulario */
@@ -153,11 +157,11 @@ var chargeCourse = (function() {
             alert('Necesitas completar el Nombre del Curso');
             return false;
         }
-        if ($(MAIN_TEACHER_ID)[0].value.length == 0) {
+        if ($(MAIN_TEACHER_ID)[0].value.length == 0 || $(MAIN_TEACHER_ID)[0].value === "Seleccionar Profesor") {
             alert('Necesitas completar el Nombre del Profesor');
             return false;
         }
-        if ($(SECOND_TEACHER_ID)[0].value.length == 0) {
+        if ($(SECOND_TEACHER_ID)[0].value.length == 0 || $(SECOND_TEACHER_ID)[0].value === "Seleccionar Ayudante") {
             alert('Necesitas completar el Nombre del Ayudante');
             return false;
         }
@@ -299,14 +303,8 @@ var chargeCourse = (function() {
             "ajax": {
                 url: GET_DATA_FIREBASE_URL,
                 success: function(data) {
-                    dataInt = data;
-                    $(TABLE_ID).dataTable().fnClearTable();
-                    if (data.cursos.length > 0) {
-                        $(TABLE_ID).dataTable().fnAddData(data.cursos);
-                        addCoursesToList(data.cursos);
-                    } else {
-                        $(TABLE_ID).dataTable().fnDraw();
-                    }
+                    addCoursesToList(data.cursos);
+                    loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert("Error en el pedido de cursos.");
@@ -325,10 +323,26 @@ var chargeCourse = (function() {
 
     /* Adherir cursos a la lista */
     var addCoursesToList = function(data) {
-        for (const row of data) {
-            courseList.push(row);
+        var map = new Map(Object.entries(data));
+        for (var [id, value] of map){
+            value = checkInfo(value);
+            courseList.push(value);
         }
         calculateStudentsAndPromPrecie();
+    }
+
+    /* Chequear informacion para evitar vacios o indefinidos */
+    var checkInfo = function(value){
+        value.name = value.name === undefined? "" : value.name;
+        value.hoursTime = value.hoursTime === undefined? "0" : value.hoursTime; 
+        value.daysTime = value.daysTime === undefined? "0" : value.daysTime; 
+        value.mainTeacher = value.mainTeacher === undefined? "" : value.mainTeacher; 
+        value.secondTeacher = value.secondTeacher === undefined? "" : value.secondTeacher; 
+        value.date = value.date === undefined? "" : value.date;
+        value.type = value.type === undefined? "" : value.type;
+        value.vacancies = value.vacancies === undefined? "0" : value.vacancies;
+        value.price = value.price === undefined? "0" : value.price;
+        return value;  
     }
 
     /* Guardo el curso cargado, creando una nueva instancia */
@@ -346,12 +360,21 @@ var chargeCourse = (function() {
                 $(AMOUNT_VACANCIES_ID).val(),
             );
             courseList.push(newCourse);
-            refCources = firebase.database().ref('cursos');
-            refCources.set(newCourse).then(function() {
+            firebase.database().ref(`cursos/${newCourse.id}/`).set({
+                id : newCourse.id,
+                name : newCourse.name,
+                hoursTime : newCourse.hoursTime,
+                daysTime : newCourse.daysTime,
+                mainTeacher : newCourse.mainTeacher,
+                secondTeacher : newCourse.secondTeacher,
+                date : newCourse.date,
+                type : newCourse.type,
+                vacancies : newCourse.vacancies
+            }).then(function() {
                 console.log('dato almacenado correctamente');
             }).catch(function(error) {
                 console.log('detectado un error', error);
-            });;
+            });
         } else { // Edicion Curso
             var courseToEdit = courseList.find(course => course.id === courseIdToEdit);
             courseToEdit.name = $(COURSE_ID).val();
@@ -362,37 +385,35 @@ var chargeCourse = (function() {
             courseToEdit.date = $(DATE_ID).val();
             courseToEdit.type = getValueSelected($(TYPE_ID)[0]);
             courseToEdit.vacancies = $(AMOUNT_VACANCIES_ID).val();
-            refCources = firebase.database().ref('cursos').child(courseToEdit.id);
-            refCources.update(courseToEdit);
+            firebase.database().ref(`cursos/${courseToEdit.id}/`).update({
+                id : courseToEdit.id,
+                name : courseToEdit.name,
+                hoursTime : courseToEdit.hoursTime,
+                daysTime : courseToEdit.daysTime,
+                mainTeacher : courseToEdit.mainTeacher,
+                secondTeacher : courseToEdit.secondTeacher,
+                date : courseToEdit.date,
+                type : courseToEdit.type,
+                vacancies : courseToEdit.vacancies
+            }).then(function() {
+                console.log('dato almacenado correctamente');
+            }).catch(function(error) {
+                console.log('detectado un error', error);
+            });
             showAndHideForm('none', 'block', ADD_COURSE);
             courseIdToEdit = "";
         }
-        postData();
-        reloadTable();
+        loadTable();
         calculateStudentsAndPromPrecie();
         clearFields();
     };
 
-    /* Actualizar Base de datos Firebase */
-    var postData = function() {
-        dataInt.cursos = courseList;
-        $.ajax({
-            url: GET_DATA_FIREBASE_URL,
-            type: "POST",
-            data: JSON.stringify(dataInt),
-            success: function() {
-                alert("success");
-            },
-            error: function(error) {
-                alert("error: " + error);
-            }
-        });
-    }
-
     /* Actualizar tabla */
-    var reloadTable = function() {
+    var loadTable = function() {
         $(TABLE_ID).dataTable().fnClearTable();
-        $(TABLE_ID).dataTable().fnAddData(courseList);
+        if (courseList.length > 0) {
+            $(TABLE_ID).dataTable().fnAddData(courseList);
+        }
         $(TABLE_ID).dataTable().fnDraw();
     }
 
