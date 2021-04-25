@@ -1,5 +1,5 @@
-var dataList = [];
 var teacherList = [];
+var listEmptiesId = [];
 
 /* Objeto a utilizar como curso */
 class Teacher {
@@ -50,7 +50,7 @@ var chargeTeacher = (function() {
     var TABLE_ID = '#TeachersTable';
     var CONTAINER = '#Container';
     var EXPORT_EXCEL = '#btnExportar';
-    var ADD_TEACHER = 'Agregar alumno';
+    var ADD_TEACHER = 'Agregar profesor';
     var HIDE_FORM = 'Ocultar formulario';
     var teacherIdToEdit = "";
     var GET_DATA_FIREBASE_URL = 'https://institutonoterix-default-rtdb.firebaseio.com/.json';
@@ -65,6 +65,7 @@ var chargeTeacher = (function() {
     var table;
     var SLIDER_NAV_BAR = '#sidebarCollapse';
     var SLIDER = '#sidebar';
+    var LOGOUT = '#logout';
 
     $(document).ready(function() {
         init();
@@ -82,6 +83,9 @@ var chargeTeacher = (function() {
     var initNavBar = function(){
         $(SLIDER_NAV_BAR).on('click', function(){
             $(SLIDER).toggleClass('active');
+        });
+        $(LOGOUT).on('click', function(){
+            logout();
         });
     }
 
@@ -397,9 +401,9 @@ var chargeTeacher = (function() {
             dni : newTeacher.dni,
             degree : newTeacher.degree
         }).then(function() {
-            console.log('dato almacenado correctamente');
+            alert('Profesor almacenado correctamente');
         }).catch(function(error) {
-            console.log('detectado un error', error);
+            alert('detectado un error', error);
         });
     }
 
@@ -423,9 +427,9 @@ var chargeTeacher = (function() {
             email : teacherToEdit.email,
             dni : teacherToEdit.dni
         }).then(function() {
-            console.log('dato almacenado correctamente');
+            alert('Profesor almacenado correctamente');
         }).catch(function(error) {
-            console.log('detectado un error', error);
+            alert('detectado un error', error);
         });
         showAndHideForm('none', 'block', ADD_TEACHER);
         teacherIdToEdit = "";
@@ -456,19 +460,35 @@ var chargeTeacher = (function() {
 
     /* Eliminar un item de la tabla y de la base  */
     var deleteValue = function(Id) {
-        teacherList.forEach(function(teacher, index, object) {
-            if (parseInt(teacher.id) === Id) {
-                object.splice(index, 1);
-            }
+        firebase.database().ref(`profesores/${Id}/`).remove()
+        .then(function() {
+            alert('Profesor borrado correctamente');
+            teacherList.forEach(function(teacher, index, object) {
+                if (parseInt(teacher.id) === Id) {
+                    object.splice(index, 1);
+                }
+            });
+            loadTable();
+        }).catch(function(error) {
+            alert('Se detecto un error', error);
+        });;
+    }
+
+    /* LogOut sesion */
+    var logout = function(){
+        firebase.auth().signOut().then(() => {
+            alert("Cierre de sesion");
+            window.location = "index.html";
+        }).catch((error) => {
+            // An error happened.
         });
-        firebase.database().ref(`profesores/${Id}/`).remove();
-        loadTable();
     }
 
     return {
         init: init,
         deleteValue: deleteValue,
-        showEdit: showEdit
+        showEdit: showEdit,
+        logout: logout
     }
 
 })();

@@ -79,6 +79,7 @@ var chargeCourse = (function() {
     var table;
     var SLIDER_NAV_BAR = '#sidebarCollapse';
     var SLIDER = '#sidebar';
+    var LOGOUT = '#logout';
 
     $(document).ready(function() {
         init();
@@ -96,6 +97,9 @@ var chargeCourse = (function() {
     var initNavBar = function(){
         $(SLIDER_NAV_BAR).on('click', function(){
             $(SLIDER).toggleClass('active');
+        });
+        $(LOGOUT).on('click', function(){
+            logout();
         });
     }
 
@@ -437,9 +441,9 @@ var chargeCourse = (function() {
             type : courseToEdit.type,
             vacancies : courseToEdit.vacancies
         }).then(function() {
-            console.log('dato almacenado correctamente');
+            alert('Curso almacenado correctamente');
         }).catch(function(error) {
-            console.log('detectado un error', error);
+            alert('detectado un error', error);
         });
         showAndHideForm('none', 'block', ADD_COURSE);
         courseIdToEdit = "";
@@ -470,9 +474,9 @@ var chargeCourse = (function() {
             type : newCourse.type,
             vacancies : newCourse.vacancies
         }).then(function() {
-            console.log('dato almacenado correctamente');
+            alert('Curso almacenado correctamente');
         }).catch(function(error) {
-            console.log('detectado un error', error);
+            alert('detectado un error', error);
         });
     }
 
@@ -514,20 +518,35 @@ var chargeCourse = (function() {
 
     /* Eliminar un item de la tabla y de la base  */
     var deleteValue = function(Id) {
-        courseList.forEach(function(course, index, object) {
-            if (parseInt(course.id) === Id) {
-                object.splice(index, 1);
-            }
+        firebase.database().ref(`cursos/${Id}/`).remove()
+        .then(function() {
+            alert('Curso borrado correctamente');
+            courseList.forEach(function(course, index, object) {
+                if (parseInt(course.id) === Id) {
+                    object.splice(index, 1);
+                }
+            });
+            loadTable();
+        }).catch(function(error) {
+            alert('Se detecto un error', error);
+        });;
+    }
+
+    /* LogOut sesion */
+    var logout = function(){
+        firebase.auth().signOut().then(() => {
+            alert("Cierre de sesion");
+            window.location = "index.html";
+        }).catch((error) => {
+            // An error happened.
         });
-        firebase.database().ref(`cursos/${Id}/`).remove();
-        calculateStudentsAndPromPrecie();
-        loadTable();
     }
 
     return {
         init: init,
         deleteValue: deleteValue,
-        showEdit: showEdit
+        showEdit: showEdit,
+        logout: logout
     }
 
 })();
