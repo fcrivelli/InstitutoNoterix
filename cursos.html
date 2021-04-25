@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Proyecto</title>
+    <!--CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--Export Awesome items CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--NAV bar CSS-->
+    <link rel="stylesheet" href="css/navBar.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-database.js"></script>
+    <script>
+        // Firebase App (the core Firebase SDK) is always required and must be listed first
+        import firebase from "firebase/app";
+        // If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
+        // import * as firebase from "firebase/app"
+        // If you enabled Analytics in your project, add the Firebase SDK for Analytics
+        import "firebase/analytics";
+        // Add the Firebase products that you want to use
+        import "firebase/auth";
+        import "firebase/firestore";
+    </script>
+
+    <!-- Excel -->
+    <script src="https://unpkg.com/xlsx@latest/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/file-saverjs@latest/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/tableexport@latest/dist/js/tableexport.min.js"></script>
+
+    <!--Java Script-->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="js/carga-cursos.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!--Data Table JS-->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap.min.js"></script>
+
+    <!--Data table CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap.min.css">
+</head>
+
+<body>
+        <div class="wrapper">
+            <nav id="sidebar">
+                <div class="sidebar-header">
+                    <h3>INSTITUTO NOTERIX</h3>
+                    <hr>
+                </div>
+                <ul class="list-unstyled components">
+                    <p>MENUS</p>
+                    <li> <a href="cursos.html"> <i class="fa fa-graduation-cap" aria-hidden="true"></i> Cursos </a> </li>
+                    <li> <a href="alumnos.html"> <i class="fa fa-users" aria-hidden="true"></i> Alumnos </a> </li>
+                    <li> <a href="profesores.html"> <i class="fa fa-users" aria-hidden="true"></i> Profesores </a> </li>
+                    <li> <a href="usuarios.html"> <i class="fa fa-user-circle-o" aria-hidden="true"></i> Usuarios </a> </li>
+                    <li> <a href="index.html"> <i class="fa fa-sign-out" aria-hidden="true"></i> Salir </a> </li>
+                </ul>
+                <ul class="list-unstyled CTAs">
+                    <li> <a href="#" id="btnExportar" class="download">Exportar Tabla</a> </li>
+                </ul>
+            </nav>
+            <div class="content">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light"> <button type="button" id="sidebarCollapse" class="btn btn-info"> <i class="fa fa-align-justify"></i> </button> <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item active"> <a class="nav-link" href="#">Contacto <span class="sr-only">(current)</span></a> </li>
+                        </ul>
+                    </div>
+                </nav>
+                <div class="content-wrapper">
+                    <main style="margin-top: 58px;">
+                        <div class="container pt-4">
+                            <section id="content">
+                                <section class="scrollable wrapper">
+                                    <div class="tab-content">
+                                        <section class="panel hbox stretch">
+                                            <div class="row" id="HideShowForm" class="hideable">
+                                                <div class="col-md-6">
+                                                    <button id="BtnHideShow" title="Agregar curso" style="display:flex; flex-direction: row; justify-content: center; align-items: center">
+                                                        <span></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                
+                                            <div class="row" id="FormInput" class="hideable">
+                                                <div class="col-md-6">
+                                                    <div class="col-md-8 center-block">
+                                                        <div>&nbsp;</div>
+                                                        <div class="form-group input-icon">
+                                                            <label>Nombre: </label>
+                                                            <input type="text" id="CourseCb" class="form-control" name="CursoId" data-live-search="true">
+                                                        </div>
+                                                        <div class="form-group input-icon">
+                                                            <label>Profesor Titular: </label>
+                                                            <select id="MainTeacherCb" class="form-control" name="MainTeacherId" data-live-search="true">
+                                                                <option>Seleccionar Profesor</option>
+                                                            </select>
+                                                        </div>
+                
+                                                        <div class="form-group input-icon">
+                                                            <label>Ayudante: </label>
+                                                            <select id="SecondTeacherCb" class="form-control" name="SecondTeacherId" data-live-search="true">
+                                                                <option>Seleccionar Ayudante</option>
+                                                            </select>
+                                                        </div>
+                
+                                                        <div class="form-group input-icon">
+                                                            <label>Fecha: </label>
+                                                            <input type="date" id="DateTb" class="form-control" />
+                                                        </div>
+                
+                                                        <div>
+                                                            <input type="checkbox" name="DefaultValue" value="true" id="ActiveChb" />
+                                                            <label>Is Active</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                
+                                                <div class="col-md-6">
+                                                    <div class="col-md-8 center-block">
+                                                        <div>&nbsp;</div>
+                                                        <div class="form-group input-icon">
+                                                            <label>Tipo de cursada:</label>
+                                                            <select id="TypeCourseCb" class="form-control">
+                                                                        <option value="1">Online</option>
+                                                                        <option value="2">Presencial</option>
+                                                                    </select>
+                                                        </div>
+                
+                                                        <div class="form-group input-icon">
+                                                            <label>Cantidad Días:</label>
+                                                            <input class="form-control" type="number" id="AmountDaysDp" />
+                                                        </div>
+                
+                                                        <div class="form-group input-icon">
+                                                            <label>Cupos:</label>
+                                                            <input class="form-control" type="number" id="AmountVacanciesDp" />
+                                                        </div>
+                
+                                                        <div class="form-group input-icon">
+                                                            <label>Hora:</label>
+                                                            <input class="form-control" type="number" id="HourDp" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                
+                                            <div class="row form-group" id="BtnSaveCancel" class="hideable">
+                                                <div class="pull-right col-md-8">
+                                                    <div class="col-md-6">
+                                                        <button type="submit" class="btn btn-success" id="saveButton">Guardar</button>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <button type="button" class="btn btn-default" id="cancelButton">Cancelar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                
+                                            <div class="row" id="Container">
+                                                <div>&nbsp;</div>
+                                                <div class="table-responsive" width="100%" style="overflow:auto;">
+                                                    <table class="table table-bordered focus table-minified" id="CoursesTable">
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label>Alumnos Cursando: </label><input type="number" id="ValueStudents" readonly>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label>Precio Promedio: </label><input type="number" id="ValuePromPrecie" readonly>
+                                                </div>
+                                                
+                                            </div>
+                                        </section>
+                                    </div>
+                                </section>
+                            </section>
+                        </div>
+                    </main>
+                    <div class="line"></div>
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>

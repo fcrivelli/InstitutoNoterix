@@ -1,5 +1,6 @@
 var dataList = [];
 var studentList = [];
+var listEmptiesId = [];
 
 /* Objeto a utilizar como curso */
 class Student {
@@ -11,15 +12,21 @@ class Student {
         this.nameCourse = nameCourse;
         this.email = email;
         this.dni = dni;
-        this.ocpation = ocupation;
+        this.ocupation = ocupation;
     }
 
     /* Genero un id unico para cada estudiante */
     uniqueId() {
         let id = 0;
-        for (const student of studentList) {
-            if (parseInt(student.id) > id) {
-                id = student.id;
+        if(listEmptiesId !== null && listEmptiesId.length > 0) {
+            id = listEmptiesId[listEmptiesId.length - 1];
+            listEmptiesId.splice(listEmptiesId.length-1, 1);
+            return id;
+        } else {
+            for (const student of studentList) {
+                if (parseInt(student.id) > id) {
+                    id = student.id;
+                }
             }
         }
         return (id + 1);
@@ -38,16 +45,27 @@ var chargeStudent = (function() {
     var FORM_INPUT_ID = '#FormInput';
     var BUTTON_SAVE_CANCEL_ID = '#BtnSaveCancel';
     var HIDE_SHOW_FORM = '#HideShowForm';
-    var BTN_HIDE_SHOW_FORM = '#BtnHideShowForm';
+    var BTN_HIDE_SHOW_FORM = '#BtnHideShow';
     var BTN_SUCCESS = '#saveButton';
     var BTN_CANCEL = '#cancelButton';
     var TABLE_ID = '#StudentsTable';
     var CONTAINER = '#Container';
-    var ADD_STUDENT = 'AGREGAR +';
-    var HIDE_FORM = 'OCULTAR -';
+    var EXPORT_EXCEL = '#btnExportar';
+    var ADD_STUDENT = 'Agregar alumno';
+    var HIDE_FORM = 'Ocultar formulario';
     var studentIdToEdit = "";
-    var GET_STUDENTS_URL = 'https://raw.githubusercontent.com/fcrivelli/InstitutoNoterix/e32f0b0c3351dc026b4b99155ef7cfa423a124ec/Alumnos';
+    var GET_DATA_FIREBASE_URL = 'https://institutonoterix-default-rtdb.firebaseio.com/.json';
+    var API_KEY = 'AIzaSyBMWlxH-4dlOlXhqCq6VMgu4ZWchaw1f7c';
+    var AUTH_DOMAIN = 'institutonoterix.firebaseapp.com';
+    var DATABASE_URL = 'https://institutonoterix-default-rtdb.firebaseio.com';
+    var PROJECT_ID = 'institutonoterix';
+    var STORAGE_BUCKET = 'institutonoterix.appspot.com';
+    var MESSAGING_SENDER_ID = '638778265851';
+    var APP_ID = '1:638778265851:web:4a3b43d4bd0d461743205e';
+    var MEASUREMENT_ID = 'G-YYR5S8WP87';
     var table;
+    var SLIDER_NAV_BAR = '#sidebarCollapse';
+    var SLIDER = '#sidebar';
 
     $(document).ready(function() {
         init();
@@ -55,34 +73,110 @@ var chargeStudent = (function() {
 
     /* Inicializo mi pantalla */
     var init = function() {
+        initNavBar();
+        initFirebase();
         initForm();
         initTable();
+        initExportExcel();
     };
+
+    var initNavBar = function(){
+        $(SLIDER_NAV_BAR).on('click', function(){
+            $(SLIDER).toggleClass('active');
+        });
+    }
+
+    /* Inicializo Firebase */
+    var initFirebase = function() {
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: API_KEY,
+            authDomain: AUTH_DOMAIN,
+            databaseURL: DATABASE_URL,
+            projectId: PROJECT_ID,
+            storageBucket: STORAGE_BUCKET,
+            messagingSenderId: MESSAGING_SENDER_ID,
+            appId: APP_ID,
+            measurementId: MEASUREMENT_ID
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    /* Exportar Excel de la tabla */
+    var initExportExcel = function(){
+        const $btnExportar = document.querySelector(EXPORT_EXCEL),
+        $tabla = document.querySelector(TABLE_ID);
+
+        $btnExportar.addEventListener("click", function() {
+            let tableExport = new TableExport($tabla, {
+                exportButtons: false, // No queremos botones
+                filename: "ListaAlumnos", //Nombre del archivo de Excel
+                sheetname: "ListaAlumnos", //Título de la hoja
+            });
+            let datos = tableExport.getExportData();
+            let preferenciasDocumento = datos.StudentsTable.xlsx;
+            tableExport.export2file(preferenciasDocumento.data, preferenciasDocumento.mimeType, preferenciasDocumento.filename, preferenciasDocumento.fileExtension, preferenciasDocumento.merges, preferenciasDocumento.RTL, preferenciasDocumento.sheetname);
+        });
+    }
 
     /* Formulario */
     /* Inicializo Formulario y botones de formulario */
     var initForm = function() {
         showAndHideForm('none', 'block', ADD_STUDENT);
+        chargeSelectsForm();
         $(BTN_HIDE_SHOW_FORM).on('click', function() {
+            this.classList.toggle("active");
             btnHideShowForm();
         });
         $(BTN_CANCEL).on('click', function() {
-            cancelCourse();
+            cancelStudent();
         });
         $(BTN_SUCCESS).on('click', function() {
             if (validateForm()) {
-                saveCourse();
+                saveStudent();
             }
         });
     }
 
+    var chargeSelectsForm = function(){
+        firebase.database().ref(`cursos`).on('value', function(data) {
+            chargeSelect($(NAME_COURSE_ID)[0], generateArray(data.val()));
+        });
+    }
+
+    /* Generar un array desde un mapa */
+    var generateArray = function(dataArray){
+        var array = new Array();
+        if(dataArray !== null) {
+            for (var value of dataArray){
+                array.push(value.name);
+            }
+        }
+        return array;
+    }
+
+    /* Cargar un elemento select */
+    var chargeSelect = function(select, array){
+        for(var i=0;i<array.length;i++){
+            var option = document.createElement("option");
+            option.text = array[i]; 
+            select.add(option);
+        }
+    }
+
     /* Muestro y Oculto el formulario */
     var showAndHideForm = function(showForm, showBtn, txtBtn) {
+        showForm === 'none'? $(FORM_INPUT_ID).slideUp() : $(FORM_INPUT_ID).slideDown();
+        showForm === 'none'? $(BUTTON_SAVE_CANCEL_ID).slideUp() : $(BUTTON_SAVE_CANCEL_ID).slideDown();
+        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp() : $(HIDE_SHOW_FORM).slideDown();
         $(FORM_INPUT_ID)[0].style.display = showForm;
         $(BUTTON_SAVE_CANCEL_ID)[0].style.display = showForm;
         $(HIDE_SHOW_FORM)[0].style.display = showBtn;
-        $(BTN_HIDE_SHOW_FORM)[0].innerText = txtBtn;
+        $(BTN_HIDE_SHOW_FORM)[0].title = txtBtn;
     }
+
 
     /* Logica para mostrar y ocultar el formulario  */
     var btnHideShowForm = function() {
@@ -111,7 +205,7 @@ var chargeStudent = (function() {
             alert('Necesitas completar la ocupacion');
             return false;
         }
-        if ($(NAME_COURSE_ID)[0].value.length == 0) {
+        if ($(NAME_COURSE_ID)[0].value.length == 0 || $(NAME_COURSE_ID)[0].value === "Seleccionar Curso") {
             alert('Necesitas completar nombre curso');
             return false;
         }
@@ -127,7 +221,7 @@ var chargeStudent = (function() {
     }
 
     /* Logica del boton cancel del formulario */
-    var cancelCourse = function() {
+    var cancelStudent = function() {
         showAndHideForm('none', 'block', ADD_STUDENT);
         clearFields();
     }
@@ -154,6 +248,9 @@ var chargeStudent = (function() {
         setValueSelected($(OCUPATION_ID)[0], student.ocupation);
         $(EMAIL_ID).val(student.email);
         $(DNI_ID).val(student.dni);
+        if($(FORM_INPUT_ID)[0].style.display === 'block'){
+            $(BTN_HIDE_SHOW_FORM)[0].classList.toggle("active"); 
+        }
         showAndHideForm('block', 'none', ADD_STUDENT);
     }
 
@@ -221,15 +318,10 @@ var chargeStudent = (function() {
                 { width: '20%', targets: 0 }
             ],
             "ajax": {
-                url: GET_STUDENTS_URL,
+                url: GET_DATA_FIREBASE_URL,
                 success: function(data) {
-                    $(TABLE_ID).dataTable().fnClearTable();
-                    if (data.data.length > 0) {
-                        $(TABLE_ID).dataTable().fnAddData(data.data);
-                        addStudentsToList(data.data);
-                    } else {
-                        $(TABLE_ID).dataTable().fnDraw();
-                    }
+                    addStudentsToList(data.alumnos);
+                    loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert("Error en el pedido de cursos.");
@@ -248,39 +340,98 @@ var chargeStudent = (function() {
 
     /* Adherir cursos a la lista */
     var addStudentsToList = function(data) {
-        for (const row of data) {
-            studentList.push(row);
+        if(data !== null){
+            var map = new Map(Object.entries(data));
+            for (var [id, value] of map){
+                if(value !== null){
+                    value = checkInfo(value);
+                    studentList.push(value);
+                } else {
+                    listEmptiesId.push(id);
+                }
+            }
         }
     }
 
-    /* Guardo el curso cargado, creando una nueva instancia */
-    var saveCourse = function() {
-        if (studentIdToEdit === "") { //Nuevo curso
-            studentList.push(new Student(
-                null,
-                $(NAME_STUDENT_ID).val(),
-                $(LAST_NAME_STUDENT_ID).val(),
-                $(AGE_ID).val(),
-                getValueSelected($(NAME_COURSE_ID)[0]),
-                $(EMAIL_ID).val(),
-                $(DNI_ID).val(),
-                getValueSelected($(OCUPATION_ID)[0]),
-            ));
-        } else { // Edicion Curso
-            var studentToEdit = studentList.find(student => student.id === studentIdToEdit);
-            studentToEdit.name = $(NAME_STUDENT_ID).val();
-            studentToEdit.lastName = $(LAST_NAME_STUDENT_ID).val();
-            studentToEdit.age = $(AGE_ID).val();
-            studentToEdit.nameCourse = getValueSelected($(NAME_COURSE_ID)[0]);
-            studentToEdit.ocupation = getValueSelected($(OCUPATION_ID)[0]);
-            studentToEdit.email = $(EMAIL_ID).val();
-            studentToEdit.dni = $(DNI_ID).val();
-            showAndHideForm('none', 'block', ADD_STUDENT);
-            studentIdToEdit = "";
+    /* Chequear informacion para evitar vacios o indefinidos */
+    var checkInfo = function(value){
+        value.name = value.name === undefined? "" : value.name;
+        value.lastName = value.lastName === undefined? "" : value.lastName; 
+        value.age = value.age === undefined? "" : value.age; 
+        value.nameCourse = value.nameCourse === undefined? "" : value.nameCourse; 
+        value.email = value.email === undefined? "" : value.email; 
+        value.dni = value.dni === undefined? "" : value.dni;
+        value.ocupation = value.ocupation === undefined? "" : value.ocupation;
+        return value;  
+    }
+
+    /* Edito el alumno cargado o creo una nueva instancia */
+    var saveStudent = function() {
+        if (studentIdToEdit === "") { //Nuevo alumno
+            createNewStudent();
+        } else { // Edicion alumno
+            updateStudent();
         }
-        reloadTable();
+        loadTable();
         clearFields();
     };
+
+    /* Crear un nuevo Item */
+    var createNewStudent = function(){
+        var  newStudent = new Student(
+            null,
+            $(NAME_STUDENT_ID).val(),
+            $(LAST_NAME_STUDENT_ID).val(),
+            $(AGE_ID).val(),
+            getValueSelected($(NAME_COURSE_ID)[0]),
+            $(EMAIL_ID).val(),
+            $(DNI_ID).val(),
+            getValueSelected($(OCUPATION_ID)[0]),
+        );
+        studentList.push(newStudent);
+        firebase.database().ref(`alumnos/${newStudent.id}/`).set({
+            id : newStudent.id,
+            name : newStudent.name,
+            lastName : newStudent.lastName,
+            age : newStudent.age,
+            nameCourse : newStudent.nameCourse,
+            email : newStudent.email,
+            dni : newStudent.dni,
+            ocupation : newStudent.ocupation
+        }).then(function() {
+            console.log('dato almacenado correctamente');
+        }).catch(function(error) {
+            console.log('detectado un error', error);
+        });
+    }
+
+    /* Editando un alumno */
+    var updateStudent = function(){
+        var studentToEdit = studentList.find(student => student.id === studentIdToEdit);
+        studentToEdit.name = $(NAME_STUDENT_ID).val();
+        studentToEdit.lastName = $(LAST_NAME_STUDENT_ID).val();
+        studentToEdit.age = $(AGE_ID).val();
+        studentToEdit.nameCourse = getValueSelected($(NAME_COURSE_ID)[0]);
+        studentToEdit.ocupation = getValueSelected($(OCUPATION_ID)[0]);
+        studentToEdit.email = $(EMAIL_ID).val();
+        studentToEdit.dni = $(DNI_ID).val();
+        firebase.database().ref(`alumnos/${studentToEdit.id}/`).update({
+            id : studentToEdit.id,
+            name : studentToEdit.name,
+            lastName : studentToEdit.lastName,
+            age : studentToEdit.age,
+            nameCourse : studentToEdit.nameCourse,
+            ocupation : studentToEdit.ocpation,
+            email : studentToEdit.email,
+            dni : studentToEdit.dni
+        }).then(function() {
+            console.log('dato almacenado correctamente');
+        }).catch(function(error) {
+            console.log('detectado un error', error);
+        });
+        showAndHideForm('none', 'block', ADD_STUDENT);
+        studentIdToEdit = "";
+    }
 
     /* Uso esta funcion ya que la lista desplegable guarda el valor de la opcion no el contenido */
     var setValueSelected = function(select, text) {
@@ -297,9 +448,11 @@ var chargeStudent = (function() {
     }
 
     /* Actualizar tabla */
-    var reloadTable = function() {
+    var loadTable = function() {
         $(TABLE_ID).dataTable().fnClearTable();
-        $(TABLE_ID).dataTable().fnAddData(studentList);
+        if (studentList.length > 0) {
+            $(TABLE_ID).dataTable().fnAddData(studentList);
+        }
         $(TABLE_ID).dataTable().fnDraw();
     }
 
@@ -310,7 +463,8 @@ var chargeStudent = (function() {
                 object.splice(index, 1);
             }
         });
-        reloadTable();
+        firebase.database().ref(`alumnos/${Id}/`).remove();
+        loadTable();
     }
 
     return {

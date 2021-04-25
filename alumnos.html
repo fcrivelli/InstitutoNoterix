@@ -5,19 +5,39 @@
     <title>Proyecto</title>
     <!--CSS-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--Export Awesome items CSS-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--NAV bar CSS-->
-    <link rel="stylesheet" href="navBar.css">
+    <link rel="stylesheet" href="css/navBar.css">
 
     <!-- Firebase -->
-    <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-database.js"></script>
+    <script>
+        // Firebase App (the core Firebase SDK) is always required and must be listed first
+        import firebase from "firebase/app";
+        // If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
+        // import * as firebase from "firebase/app"
+        // If you enabled Analytics in your project, add the Firebase SDK for Analytics
+        import "firebase/analytics";
+        // Add the Firebase products that you want to use
+        import "firebase/auth";
+        import "firebase/firestore";
+    </script>
+
+    <!-- Excel -->
+    <script src="https://unpkg.com/xlsx@latest/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/file-saverjs@latest/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/tableexport@latest/dist/js/tableexport.min.js"></script>
 
     <!--Java Script-->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="carga-alumnos.js"></script>
+    <script src="js/carga-alumnos.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
     <!--Data Table JS-->
@@ -30,114 +50,123 @@
 </head>
 
 <body>
-    <header>
-        <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
-            <div class="position-sticky">
-                <div class="list-group list-group-flush mx-3 mt-4">
-                    <a href="index.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Cursos</span></a>
-                    <a href="alumnos.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Alumnos</span></a>
-                    <a href="profesores.html" class="list-group-item list-group-item-action py-2 ripple"><i></i><span>Profesores</span></a>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>INSTITUTO NOTERIX</h3>
+                <hr>
+            </div>
+            <ul class="list-unstyled components">
+                <p>MENUS</p>
+                <li> <a href="cursos.html"> <i class="fa fa-graduation-cap" aria-hidden="true"></i> Cursos </a> </li>
+                <li> <a href="alumnos.html"> <i class="fa fa-users" aria-hidden="true"></i> Alumnos </a> </li>
+                <li> <a href="profesores.html"> <i class="fa fa-users" aria-hidden="true"></i> Profesores </a> </li>
+                <li> <a href="usuarios.html"> <i class="fa fa-user-circle-o" aria-hidden="true"></i> Usuarios </a> </li>
+                <li> <a href="index.html"> <i class="fa fa-sign-out" aria-hidden="true"></i> Salir </a> </li>
+            </ul>
+            <ul class="list-unstyled CTAs">
+                <li> <a href="#" id="btnExportar" class="download">Exportar Tabla</a> </li>
+            </ul>
+        </nav>
+        <div class="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light"> <button type="button" id="sidebarCollapse" class="btn btn-info"> <i class="fa fa-align-justify"></i> </button> <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active"> <a class="nav-link" href="#">Contacto <span class="sr-only">(current)</span></a> </li>
+                    </ul>
                 </div>
-            </div>
-        </nav>
+            </nav>
+            <div class="content-wrapper">
+                <main style="margin-top: 58px;">
+                    <div class="container pt-4">
+                        <section id="content">
+                            <section class="scrollable wrapper">
+                                <div class="tab-content">
+                                    <section class="panel hbox stretch">
+                                        <div class="row" id="HideShowForm" class="hideable">
+                                            <div class="col-md-6">
+                                                <button id="BtnHideShow" title="Agregar curso" style="display:flex; flex-direction: row; justify-content: center; align-items: center">
+                                                    <span></span>
+                                                </button>
+                                            </div>
+                                        </div>
 
-        <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fas fa-bars"></i>
-                </button>
-                <a class="navbar-brand" href="#">
-                    <img src="https://mdbootstrap.com/img/logo/mdb-transaprent-noshadows.png" height="25" alt="" loading="lazy" />
-                </a>
-            </div>
-        </nav>
-    </header>
+                                        <div class="row" id="FormInput" class="hideable">
+                                            <div class="col-md-6">
+                                                <div class="col-md-8 center-block">
+                                                    <div>&nbsp;</div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Nombre: </label>
+                                                        <input type="text" id="NameStudentCb" class="form-control" name="NombreId" data-live-search="true">
+                                                    </div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Apellido: </label>
+                                                        <input type="text" id="LastNameStudentCb" class="form-control" name="ApellidoId" data-live-search="true">
+                                                    </div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Edad: </label>
+                                                        <input type="number" id="AgeCb" class="form-control" name="AgeId" data-live-search="true">
+                                                    </div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Ocupación: </label>
+                                                        <select id="OcupationCb" class="form-control" name="OcupationId" data-live-search="true">
+                                                            <option value="1">Empleado</option>
+                                                            <option value="2">Estudiante</option>
+                                                            <option value="3">Desempleado</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-    <main style="margin-top: 58px;">
-        <div class="container pt-4">
-            <section id="content">
-                <section class="scrollable wrapper">
-                    <div class="tab-content">
-                        <section class="panel hbox stretch">
-                            <div class="row" id="HideShowForm" class="hideable">
-                                <div class="col-md-6">
-                                    <button id="BtnHideShowForm" class="btn btn-primary">Crear Curso</button>
+                                            <div class="col-md-6">
+                                                <div class="col-md-8 center-block">
+                                                    <div>&nbsp;</div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Elegir Curso:</label>
+                                                        <select name="selectedCursos" id="NameCourseCb" class="form-control"> 
+                                                            <option>Seleccionar Curso</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Email:</label>
+                                                        <input type="email" class="form-control" id="EmailCb" />
+                                                    </div>
+                                                    <div class="form-group input-icon">
+                                                        <label>Dni:</label>
+                                                        <input class="form-control" type="number" id="DniCb" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row form-group" id="BtnSaveCancel" class="hideable">
+                                            <div class="pull-right col-md-8">
+                                                <div class="col-md-6">
+                                                    <button type="submit" class="btn btn-success" id="saveButton">Guardar</button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <button type="button" class="btn btn-default" id="cancelButton">Cancelar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" id="Container">
+                                            <div>&nbsp;</div>
+                                            <div class="table-responsive" width="100%" style="overflow:auto;">
+                                                <table class="table table-bordered focus table-minified" id="StudentsTable">
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </section>
                                 </div>
-                            </div>
-
-                            <div class="row" id="FormInput" class="hideable">
-                                <div class="col-md-6">
-                                    <div class="col-md-8 center-block">
-                                        <div>&nbsp;</div>
-                                        <div class="form-group input-icon">
-                                            <label>Nombre: </label>
-                                            <input type="text" id="NameStudentCb" class="form-control" name="NombreId" data-live-search="true">
-                                        </div>
-                                        <div class="form-group input-icon">
-                                            <label>Apellido: </label>
-                                            <input type="text" id="LastNameStudentCb" class="form-control" name="ApellidoId" data-live-search="true">
-                                        </div>
-                                        <div class="form-group input-icon">
-                                            <label>Edad: </label>
-                                            <input type="number" id="AgeCb" class="form-control" name="AgeId" data-live-search="true">
-                                        </div>
-                                        <div class="form-group input-icon">
-                                            <label>Ocupación: </label>
-                                            <select id="OcupationCb" class="form-control" name="OcupationId" data-live-search="true">
-                                                <option value="1">Empleado</option>
-                                                <option value="2">Estudiante</option>
-                                                <option value="3">Desempleado</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="col-md-8 center-block">
-                                        <div>&nbsp;</div>
-                                        <div class="form-group input-icon">
-                                            <label>Elegir Curso:</label>
-                                            <select name="selectedCursos" id="NameCourseCb" class="form-control"> 
-                                                <option>Seleccionar Curso</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group input-icon">
-                                            <label>Email:</label>
-                                            <input type="email" class="form-control" id="EmailCb" />
-                                        </div>
-                                        <div class="form-group input-icon">
-                                            <label>Dni:</label>
-                                            <input class="form-control" type="number" id="DniCb" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row form-group" id="BtnSaveCancel" class="hideable">
-                                <div class="pull-right col-md-8">
-                                    <div class="col-md-6">
-                                        <button type="submit" class="btn btn-success" id="saveButton">Guardar</button>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <button type="button" class="btn btn-default" id="cancelButton">Cancelar</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row" id="Container">
-                                <div>&nbsp;</div>
-                                <div class="table-responsive" width="100%" style="overflow:auto;">
-                                    <table class="table table-bordered focus table-minified" with="auto" id="StudentsTable">
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            </section>
                         </section>
                     </div>
-                </section>
-            </section>
+                </main>
+            </div>
         </div>
-    </main>
+    </div>
 </body>
 
 </html>
