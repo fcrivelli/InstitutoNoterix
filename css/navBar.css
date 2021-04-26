@@ -45,7 +45,7 @@ body {
   transform: rotate(90deg);
 }
 
-#nav-button.active span {
+#BtnHideShow.active span {
   background-color: transparent;
 }
 
@@ -80,6 +80,7 @@ a:focus {
 .navbar {
     padding: 15px 10px;
     background: #fff;
+    width: 100%;
     border: none;
     border-radius: 0;
     margin-bottom: 40px;
