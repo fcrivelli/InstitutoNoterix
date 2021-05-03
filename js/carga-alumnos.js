@@ -144,9 +144,13 @@ var chargeStudent = (function() {
     }
 
     var chargeSelectsForm = function(){
-        firebase.database().ref(`cursos`).on('value', function(data) {
-            chargeSelect($(NAME_COURSE_ID)[0], generateArray(data.val()));
-        });
+        if(navigator.onLine){
+            firebase.database().ref(`cursos`).on('value', function(data) {
+                chargeSelect($(NAME_COURSE_ID)[0], generateArray(data.val()));
+            });
+        } else {
+            chargeSelect($(NAME_COURSE_ID)[0], generateArray(JSON.parse(sessionStorage.getItem('cursos'))));
+        }
     }
 
     /* Generar un array desde un mapa */
@@ -247,8 +251,8 @@ var chargeStudent = (function() {
         $(NAME_STUDENT_ID).val(student.name);
         $(LAST_NAME_STUDENT_ID).val(student.lastName);
         $(AGE_ID).val(student.age);
-        setValueSelected($(NAME_COURSE_ID)[0], student.nameCourse);
-        setValueSelected($(OCUPATION_ID)[0], student.ocupation);
+        $(NAME_COURSE_ID).val(setValueSelected($(NAME_COURSE_ID)[0], student.nameCourse));
+        $(OCUPATION_ID).val(setValueSelected($(OCUPATION_ID)[0], student.ocupation));
         $(EMAIL_ID).val(student.email);
         $(DNI_ID).val(student.dni);
         if($(FORM_INPUT_ID)[0].style.display === 'block'){
@@ -324,10 +328,13 @@ var chargeStudent = (function() {
                 url: GET_DATA_FIREBASE_URL,
                 success: function(data) {
                     addStudentsToList(data.alumnos);
+                    sessionStorage.setItem('alumnos', JSON.stringify(studentList));
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    alert("Error en el pedido de cursos.");
+                    alert("Error en el pedido de alumnos.");
+                    studentList = JSON.parse(sessionStorage.getItem('alumnos'));
+                    loadTable();
                 }
             },
             "fixedColumns": true,
@@ -375,6 +382,7 @@ var chargeStudent = (function() {
         } else { // Edicion alumno
             updateStudent();
         }
+        sessionStorage.setItem('alumnos', JSON.stringify(studentList));
         loadTable();
         clearFields();
     };

@@ -158,10 +158,15 @@ var chargeCourse = (function() {
     }
 
     var chargeSelectsForm = function(){
-        firebase.database().ref(`profesores`).on('value', function(data) {
-            chargeSelect($(SELECT_MAIN_TEACHER)[0], generateArray(data.val()));
-            chargeSelect($(SELECT_SECOND_TEACHER)[0], generateArray(data.val()));
-        });
+        if(navigator.onLine){
+            firebase.database().ref(`profesores`).on('value', function(data) {
+                chargeSelect($(SELECT_MAIN_TEACHER)[0], generateArray(data.val()));
+                chargeSelect($(SELECT_SECOND_TEACHER)[0], generateArray(data.val()));
+            });
+        } else {
+            chargeSelect($(SELECT_MAIN_TEACHER)[0], generateArray(JSON.parse(sessionStorage.getItem('profesores'))));
+            chargeSelect($(SELECT_SECOND_TEACHER)[0], generateArray(JSON.parse(sessionStorage.getItem('profesores'))));
+        }
     }
 
     /* Generar un array desde un mapa */
@@ -360,10 +365,13 @@ var chargeCourse = (function() {
                 url: GET_DATA_FIREBASE_URL,
                 success: function(data) {
                     addCoursesToList(data.cursos);
+                    sessionStorage.setItem('cursos', JSON.stringify(courseList));
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert("Error en el pedido de cursos.");
+                    courseList = JSON.parse(sessionStorage.getItem('cursos'));
+                    loadTable();
                 }
             },
             "fixedColumns": true,
@@ -414,6 +422,7 @@ var chargeCourse = (function() {
         } else { // Edicion Curso
             updateCourse();
         }
+        sessionStorage.setItem('cursos', JSON.stringify(courseList));
         loadTable();
         calculateStudentsAndPromPrecie();
         clearFields();

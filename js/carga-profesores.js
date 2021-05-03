@@ -144,9 +144,13 @@ var chargeTeacher = (function() {
     }
 
     var chargeSelectsForm = function(){
-        firebase.database().ref(`cursos`).on('value', function(data) {
-            chargeSelect($(NAME_COURSE_ID)[0], generateArray(data.val()));
-        });
+        if(navigator.onLine){
+            firebase.database().ref(`cursos`).on('value', function(data) {
+                chargeSelect($(NAME_COURSE_ID)[0], generateArray(data.val()));
+            });
+        } else {
+            chargeSelect($(NAME_COURSE_ID)[0], generateArray(JSON.parse(sessionStorage.getItem('cursos'))));
+        }
     }
 
     /* Generar un array desde un mapa */
@@ -247,7 +251,7 @@ var chargeTeacher = (function() {
         $(LAST_NAME_TEACHER_ID).val(teacher.lastName);
         $(DEGREE_ID).val(teacher.degree);
         $(AGE_ID).val(teacher.age);
-        setValueSelected($(NAME_COURSE_ID)[0], teacher.nameCourse);
+        $(NAME_COURSE_ID).val(setValueSelected($(NAME_COURSE_ID)[0], teacher.nameCourse));
         $(EMAIL_ID).val(teacher.email);
         $(DNI_ID).val(teacher.dni);
         if($(FORM_INPUT_ID)[0].style.display === 'block'){
@@ -323,10 +327,13 @@ var chargeTeacher = (function() {
                 url: GET_DATA_FIREBASE_URL,
                 success: function(data) {
                     addTeachersToList(data.profesores);
+                    sessionStorage.setItem('profesores', JSON.stringify(teacherList));
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    alert("Error en el pedido de cursos.");
+                    alert("Error en el pedido de profesores.");
+                    teacherList = JSON.parse(sessionStorage.getItem('profesores'));
+                    loadTable();
                 }
             },
             "fixedColumns": true,
@@ -373,7 +380,8 @@ var chargeTeacher = (function() {
             createNewTeacher();
         } else { // Edicion alumno
             updateTeacher();
-        }
+        }    
+        sessionStorage.setItem('profesores', JSON.stringify(teacherList));
         loadTable();
         clearFields();
     };
