@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--NAV bar CSS-->
     <link rel="stylesheet" href="css/navBar.css">
+    <link rel="stylesheet" href="css/modal.css">
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
@@ -44,7 +45,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap.min.css">
 </head>
 
-<body>
+<body> 
         <div class="wrapper">
             <nav id="sidebar">
                 <div class="sidebar-header">
@@ -71,6 +72,24 @@
                     </div>
                 </nav>
                 <div class="content-wrapper">
+
+                    <div id="miModal" class="modalContainer">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalTitle"></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="modalText"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="acceptButton" class="btn btn-primary">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <h3>CURSOS</h3>
                     <main style="margin-top: 10px;">
                         <div class="container pt-4">
@@ -97,14 +116,14 @@
                                                         <div class="form-group input-icon">
                                                             <label>Profesor Titular: </label>
                                                             <select id="MainTeacherCb" class="form-control" name="MainTeacherId" data-live-search="true">
-                                                                <option>Seleccionar Profesor</option>
+                                                                <option value="0">Seleccionar Profesor</option>
                                                             </select>
                                                         </div>
                 
                                                         <div class="form-group input-icon">
                                                             <label>Ayudante: </label>
                                                             <select id="SecondTeacherCb" class="form-control" name="SecondTeacherId" data-live-search="true">
-                                                                <option>Seleccionar Ayudante</option>
+                                                                <option value="0">Seleccionar Ayudante</option>
                                                             </select>
                                                         </div>
                 
@@ -112,11 +131,7 @@
                                                             <label>Fecha: </label>
                                                             <input type="date" id="DateTb" class="form-control" />
                                                         </div>
-                
-                                                        <div>
-                                                            <input type="checkbox" name="DefaultValue" value="true" id="ActiveChb" />
-                                                            <label>Is Active</label>
-                                                        </div>
+            
                                                     </div>
                                                 </div>
                 
@@ -126,8 +141,8 @@
                                                         <div class="form-group input-icon">
                                                             <label>Tipo de cursada:</label>
                                                             <select id="TypeCourseCb" class="form-control">
-                                                                        <option value="1">Online</option>
-                                                                        <option value="2">Presencial</option>
+                                                                        <option value="0">Online</option>
+                                                                        <option value="1">Presencial</option>
                                                                     </select>
                                                         </div>
                 
@@ -188,6 +203,7 @@
                 </div>
             </div>
         </div>
+    </div>
 </body>
 
 </html>

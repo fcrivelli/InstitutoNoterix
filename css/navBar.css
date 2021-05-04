@@ -5,6 +5,10 @@ body {
     background: #fafafa
 }
 
+.hideable{
+    display: none;
+}
+
 #BtnHideShow {
   cursor: pointer;
   position: relative;

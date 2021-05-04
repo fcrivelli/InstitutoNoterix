@@ -51,7 +51,6 @@ var chargeCourse = (function() {
     var AMOUNT_VACANCIES_ID = '#AmountVacanciesDp';
     var AMOUNT_DAYS_ID = '#AmountDaysDp';
     var TYPE_ID = '#TypeCourseCb';
-    var ACTIVE_ID = '#ActiveChb';
     var HOUR_ID = '#HourDp';
     var FORM_INPUT_ID = '#FormInput';
     var BUTTON_SAVE_CANCEL_ID = '#BtnSaveCancel';
@@ -80,6 +79,11 @@ var chargeCourse = (function() {
     var SLIDER_NAV_BAR = '#sidebarCollapse';
     var SLIDER = '#sidebar';
     var LOGOUT = '#logout';
+    var MODAL_TEXT = '#modalText';
+    var MODAL_TITLE = '#modalTitle';
+    var MODAL_DIALOG = '#miModal';
+    var MODAL_APPLY = '#acceptButton';
+    var body;
 
     $(document).ready(function() {
         init();
@@ -155,6 +159,37 @@ var chargeCourse = (function() {
                 saveCourse();
             }
         });
+        $(MODAL_APPLY).on('click', function() {
+            hideModalElement();
+        });
+        body = document.getElementsByTagName("body")[0];
+        span = document.getElementsByClassName("close")[0];
+        if(document.getElementById("btnModal")){
+			span.onclick = function() {
+				hideModalElement();
+			}
+			window.onclick = function(event) {
+				if (event.target == modal) {
+					hideModalElement();
+				}
+			}
+		}
+    }
+
+    var hideModalElement = function(){
+        $(MODAL_DIALOG)[0].style.display = "none";
+        body.style.position = "inherit";
+        body.style.height = "auto";
+        body.style.overflow = "visible";
+    }
+
+    var showModalElement = function(title, text){
+        $(MODAL_TEXT).html(text);
+        $(MODAL_TITLE).html(title);
+        $(MODAL_DIALOG)[0].style.display = "block";
+        body.style.position = "static";
+        body.style.height = "100%";
+        body.style.overflow = "hidden";
     }
 
     var chargeSelectsForm = function(){
@@ -184,16 +219,17 @@ var chargeCourse = (function() {
     var chargeSelect = function(select, array){
         for(var i=0;i<array.length;i++){
             var option = document.createElement("option");
-            option.text = array[i]; 
+            option.text = array[i];
+            option.value = i + 1; 
             select.add(option);
         }
     }
 
     /* Muestro y Oculto el formulario */
     var showAndHideForm = function(showForm, showBtn, txtBtn) {
-        showForm === 'none'? $(FORM_INPUT_ID).slideUp() : $(FORM_INPUT_ID).slideDown();
-        showForm === 'none'? $(BUTTON_SAVE_CANCEL_ID).slideUp() : $(BUTTON_SAVE_CANCEL_ID).slideDown();
-        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp() : $(HIDE_SHOW_FORM).slideDown();
+        showForm === 'none'? $(FORM_INPUT_ID).slideUp("slow") : $(FORM_INPUT_ID).slideDown("slow");
+        showForm === 'none'? $(BUTTON_SAVE_CANCEL_ID).slideUp("slow") : $(BUTTON_SAVE_CANCEL_ID).slideDown("slow");
+        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp("slow") : $(HIDE_SHOW_FORM).slideDown("slow");
         $(FORM_INPUT_ID)[0].style.display = showForm;
         $(BUTTON_SAVE_CANCEL_ID)[0].style.display = showForm;
         $(HIDE_SHOW_FORM)[0].style.display = showBtn;
@@ -212,35 +248,35 @@ var chargeCourse = (function() {
     /* Validacion Formulario */
     var validateForm = function() {
         if ($(COURSE_ID)[0].value.length == 0) {
-            alert('Necesitas completar el Nombre del Curso');
+            showModalElement("Cursos", "Necesitas completar el Nombre del Curso");
             return false;
         }
         if ($(MAIN_TEACHER_ID)[0].value.length == 0 || $(MAIN_TEACHER_ID)[0].value === "Seleccionar Profesor") {
-            alert('Necesitas completar el Nombre del Profesor');
+            showModalElement("Cursos", "Necesitas completar el Nombre del Profesor");
             return false;
         }
         if ($(SECOND_TEACHER_ID)[0].value.length == 0 || $(SECOND_TEACHER_ID)[0].value === "Seleccionar Ayudante") {
-            alert('Necesitas completar el Nombre del Ayudante');
+            showModalElement("Cursos", "Necesitas completar el Nombre del Ayudante");
             return false;
         }
         if ($(TYPE_ID)[0].value.length == 0) {
-            alert('Necesitas completar el Tipo');
+            showModalElement("Cursos", "Necesitas completar el Tipo");
             return false;
         }
         if ($(HOUR_ID)[0].value.length == 0) {
-            alert('Necesitas completar el Horas Curso');
+            showModalElement("Cursos", "Necesitas completar el Horas Curso");
             return false;
         }
         if ($(DATE_ID)[0].value.length == 0) {
-            alert('Necesitas completar Fecha');
+            showModalElement("Cursos", "Necesitas completar Fecha");
             return false;
         }
         if ($(AMOUNT_VACANCIES_ID)[0].value.length == 0) {
-            alert('Necesitas completar Cupos');
+            showModalElement("Cursos", "Necesitas completar Cupos");
             return false;
         }
         if ($(AMOUNT_DAYS_ID)[0].value.length == 0) {
-            alert('Necesitas completar dias');
+            showModalElement("Cursos", "Necesitas completar dias");
             return false;
         }
         return true;
@@ -262,7 +298,6 @@ var chargeCourse = (function() {
         $(DATE_ID).val('');
         $(AMOUNT_VACANCIES_ID).val('');
         $(AMOUNT_DAYS_ID).val('');
-        $(ACTIVE_ID).removeAttr('checked');
     }
 
     /* Muestro el Curso al que se desea editar */
@@ -277,7 +312,6 @@ var chargeCourse = (function() {
         $(DATE_ID).val(course.date);
         $(AMOUNT_VACANCIES_ID).val(course.vacancies);
         $(AMOUNT_DAYS_ID).val(course.daysTime);
-        $(ACTIVE_ID).removeAttr('checked');
         if($(FORM_INPUT_ID)[0].style.display === 'block'){
             $(BTN_HIDE_SHOW_FORM)[0].classList.toggle("active"); 
         }
@@ -369,7 +403,7 @@ var chargeCourse = (function() {
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    alert("Error en el pedido de cursos.");
+                    showModalElement("Cursos", "Error en el pedido de cursos.");
                     courseList = JSON.parse(sessionStorage.getItem('cursos'));
                     loadTable();
                 }
@@ -450,9 +484,9 @@ var chargeCourse = (function() {
             type : courseToEdit.type,
             vacancies : courseToEdit.vacancies
         }).then(function() {
-            alert('Curso almacenado correctamente');
+            showModalElement("Cursos", "Curso editado correctamente");
         }).catch(function(error) {
-            alert('detectado un error', error);
+            showModalElement("Cursos", "detectado un error");
         });
         showAndHideForm('none', 'block', ADD_COURSE);
         courseIdToEdit = "";
@@ -483,9 +517,9 @@ var chargeCourse = (function() {
             type : newCourse.type,
             vacancies : newCourse.vacancies
         }).then(function() {
-            alert('Curso almacenado correctamente');
+            showModalElement("Cursos", "Curso creado correctamente");
         }).catch(function(error) {
-            alert('detectado un error', error);
+            showModalElement("Cursos", "detectado un error");
         });
     }
 
@@ -502,7 +536,7 @@ var chargeCourse = (function() {
     var setValueSelected = function(select, text) {
         for (let i = 0; i < select.options.length; i++) {
             if (select.options[i].text === text) {
-                return i + 1;
+                return i;
             }
         }
     }
@@ -529,7 +563,7 @@ var chargeCourse = (function() {
     var deleteValue = function(Id) {
         firebase.database().ref(`cursos/${Id}/`).remove()
         .then(function() {
-            alert('Curso borrado correctamente');
+            showModalElement("Cursos", "Curso borrado correctamente");
             courseList.forEach(function(course, index, object) {
                 if (parseInt(course.id) === Id) {
                     object.splice(index, 1);
@@ -537,14 +571,14 @@ var chargeCourse = (function() {
             });
             loadTable();
         }).catch(function(error) {
-            alert('Se detecto un error', error);
+            showModalElement("Cursos", "Se detecto un error");
         });;
     }
 
     /* LogOut sesion */
     var logout = function(){
         firebase.auth().signOut().then(() => {
-            alert("Cierre de sesion");
+            showModalElement("Cursos", "Cierre de sesion");
             window.location = "index.html";
         }).catch((error) => {
             // An error happened.

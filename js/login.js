@@ -17,11 +17,17 @@ var login = (function() {
   var MESSAGING_SENDER_ID = '638778265851';
   var APP_ID = '1:638778265851:web:4a3b43d4bd0d461743205e';
   var MEASUREMENT_ID = 'G-YYR5S8WP87';
+  var MODAL_TEXT = '#modalText';
+  var MODAL_TITLE = '#modalTitle';
+  var MODAL_DIALOG = '#miModal';
+  var MODAL_APPLY = '#acceptButton';
+  var body;
 
   $(document).ready(function() {
     initFirebase();
     initButtonsLoginSignUp();
     initSubmitBtnLoginSignUp();
+    initModal();
   });
 
   /* Inicializo Firebase */
@@ -42,6 +48,41 @@ var login = (function() {
     firebase.initializeApp(firebaseConfig);
   }
 
+  var initModal = function(){
+    $(MODAL_APPLY).on('click', function() {
+      hideModalElement();
+    });
+    body = document.getElementsByTagName("body")[0];
+    span = document.getElementsByClassName("close")[0];
+    if(document.getElementById("btnModal")){
+      span.onclick = function() {
+        hideModalElement();
+      }
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          hideModalElement();
+        }
+      }
+    }
+  }
+
+  var hideModalElement = function(){
+    $(MODAL_DIALOG)[0].style.display = "none";
+    body.style.position = "inherit";
+    body.style.height = "auto";
+    body.style.overflow = "visible";
+  }
+
+  var showModalElement = function(title, text){
+      $(MODAL_TEXT).html(text);
+      $(MODAL_TITLE).html(title);
+      $(MODAL_DIALOG)[0].style.display = "block";
+      body.style.position = "static";
+      body.style.height = "100%";
+      body.style.overflow = "hidden";
+  }
+
+
   /* Inicializo Botones de Inicio y Registro para registro */
   var initSubmitBtnLoginSignUp = function(){
     $(SUBMIT_LOGIN).on('click', function(){
@@ -53,7 +94,7 @@ var login = (function() {
           clearFields();
           window.location = "cursos.html";
         }).catch((error) => {
-          alert(error.message);
+          showModalElement("Inicio Sesion", error.message);
         });
       }
     });
@@ -61,10 +102,10 @@ var login = (function() {
       if(validateUser($(EMAIL_SIGN_UP), $(PASSWORD_SIGN_UP))){
         firebase.auth().createUserWithEmailAndPassword($(EMAIL_SIGN_UP).val(), $(PASSWORD_SIGN_UP).val())
         .then((userCredential) => {
-          alert("Tu usuario se ha registrado");
+          showModalElement("Inicio Sesion", "Tu usuario se ha registrado");
           clearFields();
         }).catch((error) => {
-          alert(error.message);
+          showModalElement("Inicio Sesion", error.message);
         });
       }
     });
@@ -82,11 +123,11 @@ var login = (function() {
   /* Validacion de Usuario */
   var validateUser = function(email, password){
     if (email[0].value.length == 0 || email.val().indexOf('@', 0) == -1 || email.val().indexOf('.', 0) == -1) {
-      alert('Necesitas completar email o es incorrecto');
+      showModalElement("Inicio Sesion", "Necesitas completar email o es incorrecto");
       return false;
     }
     if (password[0].value.length == 0 || password[0].value.length < 6) {
-        alert('Necesitas completar password o no supera los seis caracteres');
+        showModalElement("Inicio Sesion", "Necesitas completar password o no supera los seis caracteres");
         return false;
     }
     return true;

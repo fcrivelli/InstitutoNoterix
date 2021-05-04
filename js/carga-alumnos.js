@@ -66,6 +66,11 @@ var chargeStudent = (function() {
     var SLIDER_NAV_BAR = '#sidebarCollapse';
     var SLIDER = '#sidebar';
     var LOGOUT = '#logout';
+    var MODAL_TEXT = '#modalText';
+    var MODAL_TITLE = '#modalTitle';
+    var MODAL_DIALOG = '#miModal';
+    var MODAL_APPLY = '#acceptButton';
+    var body;
 
     $(document).ready(function() {
         init();
@@ -141,6 +146,37 @@ var chargeStudent = (function() {
                 saveStudent();
             }
         });
+        $(MODAL_APPLY).on('click', function() {
+            hideModalElement();
+        });
+        body = document.getElementsByTagName("body")[0];
+        span = document.getElementsByClassName("close")[0];
+        if(document.getElementById("btnModal")){
+			span.onclick = function() {
+				hideModalElement();
+			}
+			window.onclick = function(event) {
+				if (event.target == modal) {
+					hideModalElement();
+				}
+			}
+		}
+    }
+
+    var hideModalElement = function(){
+        $(MODAL_DIALOG)[0].style.display = "none";
+        body.style.position = "inherit";
+        body.style.height = "auto";
+        body.style.overflow = "visible";
+    }
+
+    var showModalElement = function(title, text){
+        $(MODAL_TEXT).html(text);
+        $(MODAL_TITLE).html(title);
+        $(MODAL_DIALOG)[0].style.display = "block";
+        body.style.position = "static";
+        body.style.height = "100%";
+        body.style.overflow = "hidden";
     }
 
     var chargeSelectsForm = function(){
@@ -168,7 +204,8 @@ var chargeStudent = (function() {
     var chargeSelect = function(select, array){
         for(var i=0;i<array.length;i++){
             var option = document.createElement("option");
-            option.text = array[i]; 
+            option.text = array[i];
+            option.value = i + 1; 
             select.add(option);
         }
     }
@@ -197,31 +234,31 @@ var chargeStudent = (function() {
     /* Validacion Formulario */
     var validateForm = function() {
         if ($(NAME_STUDENT_ID)[0].value.length == 0) {
-            alert('Necesitas completar el Nombre');
+            showModalElement("Alumnos", "Necesitas completar el Nombre");
             return false;
         }
         if ($(LAST_NAME_STUDENT_ID)[0].value.length == 0) {
-            alert('Necesitas completar el Apellido');
+            showModalElement("Alumnos", "Necesitas completar el Apellido");
             return false;
         }
         if ($(AGE_ID)[0].value.length == 0) {
-            alert('Necesitas completar la edad');
+            showModalElement("Alumnos", "Necesitas completar la edad");
             return false;
         }
         if ($(OCUPATION_ID)[0].value.length == 0) {
-            alert('Necesitas completar la ocupacion');
+            showModalElement("Alumnos", "Necesitas completar la ocupacion");
             return false;
         }
         if ($(NAME_COURSE_ID)[0].value.length == 0 || $(NAME_COURSE_ID)[0].value === "Seleccionar Curso") {
-            alert('Necesitas completar nombre curso');
+            showModalElement("Alumnos", "Necesitas completar nombre curso");
             return false;
         }
         if ($(EMAIL_ID)[0].value.length == 0 || $(EMAIL_ID).val().indexOf('@', 0) == -1 || $(EMAIL_ID).val().indexOf('.', 0) == -1) {
-            alert('Necesitas completar email o es incorrecto');
+            showModalElement("Alumnos", "Necesitas completar email o es incorrecto");
             return false;
         }
         if ($(DNI_ID)[0].value.length == 0 || $(DNI_ID)[0].value.length < 6) {
-            alert('Necesitas completar dni');
+            showModalElement("Alumnos", "Necesitas completar dni");
             return false;
         }
         return true;
@@ -332,7 +369,7 @@ var chargeStudent = (function() {
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    alert("Error en el pedido de alumnos.");
+                    showModalElement("Alumnos", "Error en el pedido de alumnos.");
                     studentList = JSON.parse(sessionStorage.getItem('alumnos'));
                     loadTable();
                 }
@@ -410,9 +447,9 @@ var chargeStudent = (function() {
             dni : newStudent.dni,
             ocupation : newStudent.ocupation
         }).then(function() {
-            alert('Alumno creado correctamente');
+            showModalElement("Alumnos", "Alumno creado correctamente");
         }).catch(function(error) {
-            alert('Se detecto un error', error);
+            showModalElement("Alumnos", "Se detecto un error");
         });
     }
 
@@ -432,13 +469,13 @@ var chargeStudent = (function() {
             lastName : studentToEdit.lastName,
             age : studentToEdit.age,
             nameCourse : studentToEdit.nameCourse,
-            ocupation : studentToEdit.ocpation,
+            ocupation : studentToEdit.ocupation,
             email : studentToEdit.email,
             dni : studentToEdit.dni
         }).then(function() {
-            alert('Alumno editado correctamente');
+            showModalElement("Alumnos", "Alumno editado correctamente");
         }).catch(function(error) {
-            alert('Se detecto un error', error);
+            showModalElement("Alumnos", "Se detecto un error");
         });
         showAndHideForm('none', 'block', ADD_STUDENT);
         studentIdToEdit = "";
@@ -448,7 +485,7 @@ var chargeStudent = (function() {
     var setValueSelected = function(select, text) {
         for (let i = 0; i < select.options.length; i++) {
             if (select.options[i].text === text) {
-                return i + 1;
+                return i;
             }
         }
     }
@@ -471,7 +508,7 @@ var chargeStudent = (function() {
     var deleteValue = function(Id) {
         firebase.database().ref(`alumnos/${Id}/`).remove()
         .then(function() {
-            alert('Alumno borrado correctamente');
+            showModalElement("Alumnos", "Alumno borrado correctamente");
             studentList.forEach(function(student, index, object) {
                 if (parseInt(student.id) === Id) {
                     object.splice(index, 1);
@@ -479,14 +516,14 @@ var chargeStudent = (function() {
             });
             loadTable();
         }).catch(function(error) {
-            alert('Se detecto un error', error);
+            showModalElement("Alumnos", "Se detecto un error");
         });;
     }
 
     /* LogOut sesion */
     var logout = function(){
         firebase.auth().signOut().then(() => {
-            alert("Cierre de sesion");
+            showModalElement("Alumnos", "Cierre de sesion");
             window.location = "index.html";
         }).catch((error) => {
             // An error happened.

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--NAV bar CSS-->
     <link rel="stylesheet" href="css/navBar.css">
+    <link rel="stylesheet" href="css/modal.css">
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-app.js"></script>
@@ -17,13 +18,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-database.js"></script>
     <script>
-        // Firebase App (the core Firebase SDK) is always required and must be listed first
         import firebase from "firebase/app";
-        // If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
-        // import * as firebase from "firebase/app"
-        // If you enabled Analytics in your project, add the Firebase SDK for Analytics
         import "firebase/analytics";
-        // Add the Firebase products that you want to use
         import "firebase/auth";
         import "firebase/firestore";
     </script>
@@ -76,6 +72,24 @@
                 </div>
             </nav>
             <div class="content-wrapper">
+
+                <div id="miModal" class="modalContainer">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalTitle"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="modalText"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="acceptButton" class="btn btn-primary">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <h3>ALUMNOS</h3>
                 <main style="margin-top: 10px;">
                     <div class="container pt-4">
@@ -110,9 +124,9 @@
                                                     <div class="form-group input-icon">
                                                         <label>Ocupación: </label>
                                                         <select id="OcupationCb" class="form-control" name="OcupationId" data-live-search="true">
-                                                            <option value="1">Empleado</option>
-                                                            <option value="2">Estudiante</option>
-                                                            <option value="3">Desempleado</option>
+                                                            <option value="0">Empleado</option>
+                                                            <option value="1">Estudiante</option>
+                                                            <option value="2">Desempleado</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -124,7 +138,7 @@
                                                     <div class="form-group input-icon">
                                                         <label>Elegir Curso:</label>
                                                         <select name="selectedCursos" id="NameCourseCb" class="form-control"> 
-                                                            <option>Seleccionar Curso</option>
+                                                            <option value="0">Seleccionar Curso</option>
                                                         </select>
                                                     </div>
                                                     <div class="form-group input-icon">

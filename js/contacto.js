@@ -1,4 +1,3 @@
-
 var contacto = (function() {
 
     var SLIDER_NAV_BAR = '#sidebarCollapse';
