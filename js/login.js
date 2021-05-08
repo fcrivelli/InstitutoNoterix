@@ -20,8 +20,11 @@ var login = (function() {
   var MODAL_TEXT = '#modalText';
   var MODAL_TITLE = '#modalTitle';
   var MODAL_DIALOG = '#miModal';
-  var MODAL_APPLY = '#acceptButton';
+  var MODAL_APPLY = '#acceptModalButton';
+  var MODAL_CLOSE = '#closeModalButton';
   var body;
+  var displayForm;
+  var isEditing;
 
   $(document).ready(function() {
     initFirebase();
@@ -52,12 +55,11 @@ var login = (function() {
     $(MODAL_APPLY).on('click', function() {
       hideModalElement();
     });
+    $(MODAL_CLOSE).on('click', function(){
+      hideModalElement();
+    });
     body = document.getElementsByTagName("body")[0];
-    span = document.getElementsByClassName("close")[0];
     if(document.getElementById("btnModal")){
-      span.onclick = function() {
-        hideModalElement();
-      }
       window.onclick = function(event) {
         if (event.target == modal) {
           hideModalElement();
@@ -73,10 +75,16 @@ var login = (function() {
     body.style.overflow = "visible";
   }
 
-  var showModalElement = function(title, text){
+  var showModalElement = function(title, text, isEdited){
       $(MODAL_TEXT).html(text);
       $(MODAL_TITLE).html(title);
-      $(MODAL_DIALOG)[0].style.display = "block";
+      isEditing = isEdited;
+      $(MODAL_DIALOG).fadeIn(2000).delay(3000).fadeOut(2000).animate({width: '100%'}, 
+      {done: function(){
+          if(isEdited) {
+              showAndHideForm('none', 'block', ADD_TEACHER);
+          }
+      }});
       body.style.position = "static";
       body.style.height = "100%";
       body.style.overflow = "hidden";
@@ -94,7 +102,7 @@ var login = (function() {
           clearFields();
           window.location = "cursos.html";
         }).catch((error) => {
-          showModalElement("Inicio Sesion", error.message);
+          showModalElement("Inicio Sesion", error.message, false);
         });
       }
     });
@@ -102,10 +110,10 @@ var login = (function() {
       if(validateUser($(EMAIL_SIGN_UP), $(PASSWORD_SIGN_UP))){
         firebase.auth().createUserWithEmailAndPassword($(EMAIL_SIGN_UP).val(), $(PASSWORD_SIGN_UP).val())
         .then((userCredential) => {
-          showModalElement("Inicio Sesion", "Tu usuario se ha registrado");
+          showModalElement("Inicio Sesion", "Tu usuario se ha registrado", false);
           clearFields();
         }).catch((error) => {
-          showModalElement("Inicio Sesion", error.message);
+          showModalElement("Inicio Sesion", error.message, false);
         });
       }
     });
@@ -123,11 +131,11 @@ var login = (function() {
   /* Validacion de Usuario */
   var validateUser = function(email, password){
     if (email[0].value.length == 0 || email.val().indexOf('@', 0) == -1 || email.val().indexOf('.', 0) == -1) {
-      showModalElement("Inicio Sesion", "Necesitas completar email o es incorrecto");
+      showModalElement("Inicio Sesion", "Necesitas completar email o es incorrecto", false);
       return false;
     }
     if (password[0].value.length == 0 || password[0].value.length < 6) {
-        showModalElement("Inicio Sesion", "Necesitas completar password o no supera los seis caracteres");
+        showModalElement("Inicio Sesion", "Necesitas completar password o no supera los seis caracteres", false);
         return false;
     }
     return true;

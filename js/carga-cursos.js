@@ -82,8 +82,11 @@ var chargeCourse = (function() {
     var MODAL_TEXT = '#modalText';
     var MODAL_TITLE = '#modalTitle';
     var MODAL_DIALOG = '#miModal';
-    var MODAL_APPLY = '#acceptButton';
+    var MODAL_APPLY = '#acceptModalButton';
+    var MODAL_CLOSE = '#closeModalButton';
     var body;
+    var displayForm;
+    var isEditing;
 
     $(document).ready(function() {
         init();
@@ -161,13 +164,18 @@ var chargeCourse = (function() {
         });
         $(MODAL_APPLY).on('click', function() {
             hideModalElement();
+            if(isEditing) {
+                showAndHideForm('none', 'block', ADD_COURSE);
+            }
+        });
+        $(MODAL_CLOSE).on('click', function(){
+            hideModalElement();
+            if(isEditing) {
+                showAndHideForm('none', 'block', ADD_COURSE);
+            }
         });
         body = document.getElementsByTagName("body")[0];
-        span = document.getElementsByClassName("close")[0];
         if(document.getElementById("btnModal")){
-			span.onclick = function() {
-				hideModalElement();
-			}
 			window.onclick = function(event) {
 				if (event.target == modal) {
 					hideModalElement();
@@ -183,10 +191,16 @@ var chargeCourse = (function() {
         body.style.overflow = "visible";
     }
 
-    var showModalElement = function(title, text){
+    var showModalElement = function(title, text, isEdited){
         $(MODAL_TEXT).html(text);
         $(MODAL_TITLE).html(title);
-        $(MODAL_DIALOG)[0].style.display = "block";
+        isEditing = isEdited;
+        $(MODAL_DIALOG).fadeIn(2000).delay(3000).fadeOut(2000).animate({width: '100%'}, 
+        {done: function(){
+            if(isEdited) {
+                showAndHideForm('none', 'block', ADD_COURSE);
+            }
+        }});
         body.style.position = "static";
         body.style.height = "100%";
         body.style.overflow = "hidden";
@@ -227,18 +241,21 @@ var chargeCourse = (function() {
 
     /* Muestro y Oculto el formulario */
     var showAndHideForm = function(showForm, showBtn, txtBtn) {
-        showForm === 'none'? $(FORM_INPUT_ID).slideUp("slow") : $(FORM_INPUT_ID).slideDown("slow");
-        showForm === 'none'? $(BUTTON_SAVE_CANCEL_ID).slideUp("slow") : $(BUTTON_SAVE_CANCEL_ID).slideDown("slow");
-        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp("slow") : $(HIDE_SHOW_FORM).slideDown("slow");
-        $(FORM_INPUT_ID)[0].style.display = showForm;
-        $(BUTTON_SAVE_CANCEL_ID)[0].style.display = showForm;
-        $(HIDE_SHOW_FORM)[0].style.display = showBtn;
+        if(showForm === 'none'){
+            $(FORM_INPUT_ID).slideUp(2000);
+            $(BUTTON_SAVE_CANCEL_ID).slideUp(2000);
+        } else {
+            $(FORM_INPUT_ID).slideDown(2000);
+            $(BUTTON_SAVE_CANCEL_ID).slideDown(2000);
+        }
+        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp(2000) : $(HIDE_SHOW_FORM).slideDown(2000);
         $(BTN_HIDE_SHOW_FORM)[0].title = txtBtn;
+        displayForm = showForm;
     }
 
     /* Logica para mostrar y ocultar el formulario  */
     var btnHideShowForm = function() {
-        if ($(FORM_INPUT_ID)[0].style.display === 'block') {
+        if (displayForm === 'block') {
             showAndHideForm('none', 'block', ADD_COURSE);
         } else {
             showAndHideForm('block', 'block', HIDE_FORM);
@@ -248,35 +265,35 @@ var chargeCourse = (function() {
     /* Validacion Formulario */
     var validateForm = function() {
         if ($(COURSE_ID)[0].value.length == 0) {
-            showModalElement("Cursos", "Necesitas completar el Nombre del Curso");
+            showModalElement("Cursos", "Necesitas completar el Nombre del Curso", false);
             return false;
         }
         if ($(MAIN_TEACHER_ID)[0].value.length == 0 || $(MAIN_TEACHER_ID)[0].value === "Seleccionar Profesor") {
-            showModalElement("Cursos", "Necesitas completar el Nombre del Profesor");
+            showModalElement("Cursos", "Necesitas completar el Nombre del Profesor", false);
             return false;
         }
         if ($(SECOND_TEACHER_ID)[0].value.length == 0 || $(SECOND_TEACHER_ID)[0].value === "Seleccionar Ayudante") {
-            showModalElement("Cursos", "Necesitas completar el Nombre del Ayudante");
+            showModalElement("Cursos", "Necesitas completar el Nombre del Ayudante", false);
             return false;
         }
         if ($(TYPE_ID)[0].value.length == 0) {
-            showModalElement("Cursos", "Necesitas completar el Tipo");
+            showModalElement("Cursos", "Necesitas completar el Tipo", false);
             return false;
         }
         if ($(HOUR_ID)[0].value.length == 0) {
-            showModalElement("Cursos", "Necesitas completar el Horas Curso");
+            showModalElement("Cursos", "Necesitas completar el Horas Curso", false);
             return false;
         }
         if ($(DATE_ID)[0].value.length == 0) {
-            showModalElement("Cursos", "Necesitas completar Fecha");
+            showModalElement("Cursos", "Necesitas completar Fecha", false);
             return false;
         }
         if ($(AMOUNT_VACANCIES_ID)[0].value.length == 0) {
-            showModalElement("Cursos", "Necesitas completar Cupos");
+            showModalElement("Cursos", "Necesitas completar Cupos", false);
             return false;
         }
         if ($(AMOUNT_DAYS_ID)[0].value.length == 0) {
-            showModalElement("Cursos", "Necesitas completar dias");
+            showModalElement("Cursos", "Necesitas completar dias", false);
             return false;
         }
         return true;
@@ -403,7 +420,7 @@ var chargeCourse = (function() {
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    showModalElement("Cursos", "Error en el pedido de cursos.");
+                    showModalElement("Cursos", "Error en el pedido de cursos.", false);
                     courseList = JSON.parse(sessionStorage.getItem('cursos'));
                     loadTable();
                 }
@@ -484,11 +501,10 @@ var chargeCourse = (function() {
             type : courseToEdit.type,
             vacancies : courseToEdit.vacancies
         }).then(function() {
-            showModalElement("Cursos", "Curso editado correctamente");
+            showModalElement("Cursos", "Curso editado correctamente", true);
         }).catch(function(error) {
-            showModalElement("Cursos", "detectado un error");
+            showModalElement("Cursos", "detectado un error", true);
         });
-        showAndHideForm('none', 'block', ADD_COURSE);
         courseIdToEdit = "";
     }
 
@@ -517,9 +533,9 @@ var chargeCourse = (function() {
             type : newCourse.type,
             vacancies : newCourse.vacancies
         }).then(function() {
-            showModalElement("Cursos", "Curso creado correctamente");
+            showModalElement("Cursos", "Curso creado correctamente", false);
         }).catch(function(error) {
-            showModalElement("Cursos", "detectado un error");
+            showModalElement("Cursos", "detectado un error", false);
         });
     }
 
@@ -563,7 +579,7 @@ var chargeCourse = (function() {
     var deleteValue = function(Id) {
         firebase.database().ref(`cursos/${Id}/`).remove()
         .then(function() {
-            showModalElement("Cursos", "Curso borrado correctamente");
+            showModalElement("Cursos", "Curso borrado correctamente", false);
             courseList.forEach(function(course, index, object) {
                 if (parseInt(course.id) === Id) {
                     object.splice(index, 1);
@@ -571,14 +587,14 @@ var chargeCourse = (function() {
             });
             loadTable();
         }).catch(function(error) {
-            showModalElement("Cursos", "Se detecto un error");
+            showModalElement("Cursos", "Se detecto un error", false);
         });;
     }
 
     /* LogOut sesion */
     var logout = function(){
         firebase.auth().signOut().then(() => {
-            showModalElement("Cursos", "Cierre de sesion");
+            showModalElement("Cursos", "Cierre de sesion", false);
             window.location = "index.html";
         }).catch((error) => {
             // An error happened.

@@ -69,8 +69,11 @@ var chargeStudent = (function() {
     var MODAL_TEXT = '#modalText';
     var MODAL_TITLE = '#modalTitle';
     var MODAL_DIALOG = '#miModal';
-    var MODAL_APPLY = '#acceptButton';
+    var MODAL_APPLY = '#acceptModalButton';
+    var MODAL_CLOSE = '#closeModalButton';
     var body;
+    var displayForm;
+    var isEditing;
 
     $(document).ready(function() {
         init();
@@ -148,13 +151,18 @@ var chargeStudent = (function() {
         });
         $(MODAL_APPLY).on('click', function() {
             hideModalElement();
+            if(isEditing) {
+                showAndHideForm('none', 'block', ADD_STUDENT);
+            }
+        });
+        $(MODAL_CLOSE).on('click', function(){
+            hideModalElement();
+            if(isEditing) {
+                showAndHideForm('none', 'block', ADD_STUDENT);
+            }
         });
         body = document.getElementsByTagName("body")[0];
-        span = document.getElementsByClassName("close")[0];
         if(document.getElementById("btnModal")){
-			span.onclick = function() {
-				hideModalElement();
-			}
 			window.onclick = function(event) {
 				if (event.target == modal) {
 					hideModalElement();
@@ -170,10 +178,16 @@ var chargeStudent = (function() {
         body.style.overflow = "visible";
     }
 
-    var showModalElement = function(title, text){
+    var showModalElement = function(title, text, isEdited){
         $(MODAL_TEXT).html(text);
         $(MODAL_TITLE).html(title);
-        $(MODAL_DIALOG)[0].style.display = "block";
+        isEditing = isEdited;
+        $(MODAL_DIALOG).fadeIn(2000).delay(3000).fadeOut(2000).animate({width: '100%'}, 
+        {done: function(){
+            if(isEdited) {
+                showAndHideForm('none', 'block', ADD_STUDENT);
+            }
+        }});
         body.style.position = "static";
         body.style.height = "100%";
         body.style.overflow = "hidden";
@@ -212,19 +226,22 @@ var chargeStudent = (function() {
 
     /* Muestro y Oculto el formulario */
     var showAndHideForm = function(showForm, showBtn, txtBtn) {
-        showForm === 'none'? $(FORM_INPUT_ID).slideUp() : $(FORM_INPUT_ID).slideDown();
-        showForm === 'none'? $(BUTTON_SAVE_CANCEL_ID).slideUp() : $(BUTTON_SAVE_CANCEL_ID).slideDown();
-        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp() : $(HIDE_SHOW_FORM).slideDown();
-        $(FORM_INPUT_ID)[0].style.display = showForm;
-        $(BUTTON_SAVE_CANCEL_ID)[0].style.display = showForm;
-        $(HIDE_SHOW_FORM)[0].style.display = showBtn;
+        if(showForm === 'none'){
+            $(FORM_INPUT_ID).slideUp(2000);
+            $(BUTTON_SAVE_CANCEL_ID).slideUp(2000);
+        } else {
+            $(FORM_INPUT_ID).slideDown(2000);
+            $(BUTTON_SAVE_CANCEL_ID).slideDown(2000);
+        }
+        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp(2000) : $(HIDE_SHOW_FORM).slideDown(2000);
         $(BTN_HIDE_SHOW_FORM)[0].title = txtBtn;
+        displayForm = showForm;
     }
 
 
     /* Logica para mostrar y ocultar el formulario  */
     var btnHideShowForm = function() {
-        if ($(FORM_INPUT_ID)[0].style.display === 'block') {
+        if (displayForm === 'block') {
             showAndHideForm('none', 'block', ADD_STUDENT);
         } else {
             showAndHideForm('block', 'block', HIDE_FORM);
@@ -234,31 +251,31 @@ var chargeStudent = (function() {
     /* Validacion Formulario */
     var validateForm = function() {
         if ($(NAME_STUDENT_ID)[0].value.length == 0) {
-            showModalElement("Alumnos", "Necesitas completar el Nombre");
+            showModalElement("Alumnos", "Necesitas completar el Nombre", false);
             return false;
         }
         if ($(LAST_NAME_STUDENT_ID)[0].value.length == 0) {
-            showModalElement("Alumnos", "Necesitas completar el Apellido");
+            showModalElement("Alumnos", "Necesitas completar el Apellido", false);
             return false;
         }
         if ($(AGE_ID)[0].value.length == 0) {
-            showModalElement("Alumnos", "Necesitas completar la edad");
+            showModalElement("Alumnos", "Necesitas completar la edad", false);
             return false;
         }
         if ($(OCUPATION_ID)[0].value.length == 0) {
-            showModalElement("Alumnos", "Necesitas completar la ocupacion");
+            showModalElement("Alumnos", "Necesitas completar la ocupacion", false);
             return false;
         }
         if ($(NAME_COURSE_ID)[0].value.length == 0 || $(NAME_COURSE_ID)[0].value === "Seleccionar Curso") {
-            showModalElement("Alumnos", "Necesitas completar nombre curso");
+            showModalElement("Alumnos", "Necesitas completar nombre curso", false);
             return false;
         }
         if ($(EMAIL_ID)[0].value.length == 0 || $(EMAIL_ID).val().indexOf('@', 0) == -1 || $(EMAIL_ID).val().indexOf('.', 0) == -1) {
-            showModalElement("Alumnos", "Necesitas completar email o es incorrecto");
+            showModalElement("Alumnos", "Necesitas completar email o es incorrecto", false);
             return false;
         }
         if ($(DNI_ID)[0].value.length == 0 || $(DNI_ID)[0].value.length < 6) {
-            showModalElement("Alumnos", "Necesitas completar dni");
+            showModalElement("Alumnos", "Necesitas completar dni", false);
             return false;
         }
         return true;
@@ -369,7 +386,7 @@ var chargeStudent = (function() {
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    showModalElement("Alumnos", "Error en el pedido de alumnos.");
+                    showModalElement("Alumnos", "Error en el pedido de alumnos.", false);
                     studentList = JSON.parse(sessionStorage.getItem('alumnos'));
                     loadTable();
                 }
@@ -447,9 +464,9 @@ var chargeStudent = (function() {
             dni : newStudent.dni,
             ocupation : newStudent.ocupation
         }).then(function() {
-            showModalElement("Alumnos", "Alumno creado correctamente");
+            showModalElement("Alumnos", "Alumno creado correctamente", false);
         }).catch(function(error) {
-            showModalElement("Alumnos", "Se detecto un error");
+            showModalElement("Alumnos", "Se detecto un error", false);
         });
     }
 
@@ -473,11 +490,10 @@ var chargeStudent = (function() {
             email : studentToEdit.email,
             dni : studentToEdit.dni
         }).then(function() {
-            showModalElement("Alumnos", "Alumno editado correctamente");
+            showModalElement("Alumnos", "Alumno editado correctamente", true);
         }).catch(function(error) {
-            showModalElement("Alumnos", "Se detecto un error");
+            showModalElement("Alumnos", "Se detecto un error", true);
         });
-        showAndHideForm('none', 'block', ADD_STUDENT);
         studentIdToEdit = "";
     }
 
@@ -508,7 +524,7 @@ var chargeStudent = (function() {
     var deleteValue = function(Id) {
         firebase.database().ref(`alumnos/${Id}/`).remove()
         .then(function() {
-            showModalElement("Alumnos", "Alumno borrado correctamente");
+            showModalElement("Alumnos", "Alumno borrado correctamente", false);
             studentList.forEach(function(student, index, object) {
                 if (parseInt(student.id) === Id) {
                     object.splice(index, 1);
@@ -516,14 +532,14 @@ var chargeStudent = (function() {
             });
             loadTable();
         }).catch(function(error) {
-            showModalElement("Alumnos", "Se detecto un error");
+            showModalElement("Alumnos", "Se detecto un error", false);
         });;
     }
 
     /* LogOut sesion */
     var logout = function(){
         firebase.auth().signOut().then(() => {
-            showModalElement("Alumnos", "Cierre de sesion");
+            showModalElement("Alumnos", "Cierre de sesion", false);
             window.location = "index.html";
         }).catch((error) => {
             // An error happened.

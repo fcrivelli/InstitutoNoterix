@@ -69,8 +69,11 @@ var chargeTeacher = (function() {
     var MODAL_TEXT = '#modalText';
     var MODAL_TITLE = '#modalTitle';
     var MODAL_DIALOG = '#miModal';
-    var MODAL_APPLY = '#acceptButton';
+    var MODAL_APPLY = '#acceptModalButton';
+    var MODAL_CLOSE = '#closeModalButton';
     var body;
+    var displayForm;
+    var isEditing;
 
     $(document).ready(function() {
         init();
@@ -148,13 +151,18 @@ var chargeTeacher = (function() {
         });
         $(MODAL_APPLY).on('click', function() {
             hideModalElement();
+            if(isEditing) {
+                showAndHideForm('none', 'block', ADD_TEACHER);
+            }
+        });
+        $(MODAL_CLOSE).on('click', function(){
+            hideModalElement();
+            if(isEditing) {
+                showAndHideForm('none', 'block', ADD_TEACHER);
+            }
         });
         body = document.getElementsByTagName("body")[0];
-        span = document.getElementsByClassName("close")[0];
         if(document.getElementById("btnModal")){
-			span.onclick = function() {
-				hideModalElement();
-			}
 			window.onclick = function(event) {
 				if (event.target == modal) {
 					hideModalElement();
@@ -170,10 +178,16 @@ var chargeTeacher = (function() {
         body.style.overflow = "visible";
     }
 
-    var showModalElement = function(title, text){
+    var showModalElement = function(title, text, isEdited){
         $(MODAL_TEXT).html(text);
         $(MODAL_TITLE).html(title);
-        $(MODAL_DIALOG)[0].style.display = "block";
+        isEditing = isEdited;
+        $(MODAL_DIALOG).fadeIn(2000).delay(3000).fadeOut(2000).animate({width: '100%'}, 
+        {done: function(){
+            if(isEdited) {
+                showAndHideForm('none', 'block', ADD_TEACHER);
+            }
+        }});
         body.style.position = "static";
         body.style.height = "100%";
         body.style.overflow = "hidden";
@@ -210,20 +224,23 @@ var chargeTeacher = (function() {
         }
     }
 
-    /* Muestro y Oculto el formulario */
-    var showAndHideForm = function(showForm, showBtn, txtBtn) {
-        showForm === 'none'? $(FORM_INPUT_ID).slideUp() : $(FORM_INPUT_ID).slideDown();
-        showForm === 'none'? $(BUTTON_SAVE_CANCEL_ID).slideUp() : $(BUTTON_SAVE_CANCEL_ID).slideDown();
-        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp() : $(HIDE_SHOW_FORM).slideDown();
-        $(FORM_INPUT_ID)[0].style.display = showForm;
-        $(BUTTON_SAVE_CANCEL_ID)[0].style.display = showForm;
-        $(HIDE_SHOW_FORM)[0].style.display = showBtn;
+     /* Muestro y Oculto el formulario */
+     var showAndHideForm = function(showForm, showBtn, txtBtn) {
+        if(showForm === 'none'){
+            $(FORM_INPUT_ID).slideUp(2000);
+            $(BUTTON_SAVE_CANCEL_ID).slideUp(2000);
+        } else {
+            $(FORM_INPUT_ID).slideDown(2000);
+            $(BUTTON_SAVE_CANCEL_ID).slideDown(2000);
+        }
+        showBtn === 'none' ? $(HIDE_SHOW_FORM).slideUp(2000) : $(HIDE_SHOW_FORM).slideDown(2000);
         $(BTN_HIDE_SHOW_FORM)[0].title = txtBtn;
+        displayForm = showForm;
     }
 
     /* Logica para mostrar y ocultar el formulario  */
     var btnHideShowForm = function() {
-        if ($(FORM_INPUT_ID)[0].style.display === 'block') {
+        if (displayForm === 'block') {
             showAndHideForm('none', 'block', ADD_TEACHER);
         } else {
             showAndHideForm('block', 'block', HIDE_FORM);
@@ -233,31 +250,31 @@ var chargeTeacher = (function() {
     /* Validacion Formulario */
     var validateForm = function() {
         if ($(NAME_TEACHER_ID)[0].value.length == 0) {
-            showModalElement("Profesores", "Necesitas completar el Nombre");
+            showModalElement("Profesores", "Necesitas completar el Nombre", false);
             return false;
         }
         if ($(LAST_NAME_TEACHER_ID)[0].value.length == 0) {
-            showModalElement("Profesores", "Necesitas completar el Apellido");
+            showModalElement("Profesores", "Necesitas completar el Apellido", false);
             return false;
         }
         if ($(DEGREE_ID)[0].value.length == 0) {
-            showModalElement("Profesores", "Necesitas completar el Titulo");
+            showModalElement("Profesores", "Necesitas completar el Titulo", false);
             return false;
         }
         if ($(AGE_ID)[0].value.length == 0) {
-            showModalElement("Profesores", "Necesitas completar la edad");
+            showModalElement("Profesores", "Necesitas completar la edad", false);
             return false;
         }
         if ($(NAME_COURSE_ID)[0].value.length == 0 || $(NAME_COURSE_ID)[0].value === "Seleccionar Curso") {
-            showModalElement("Profesores", "Necesitas completar nombre curso");
+            showModalElement("Profesores", "Necesitas completar nombre curso", false);
             return false;
         }
         if ($(EMAIL_ID)[0].value.length == 0 || $(EMAIL_ID).val().indexOf('@', 0) == -1 || $(EMAIL_ID).val().indexOf('.', 0) == -1) {
-            showModalElement("Profesores", "Necesitas completar email o es incorrecto");
+            showModalElement("Profesores", "Necesitas completar email o es incorrecto", false);
             return false;
         }
         if ($(DNI_ID)[0].value.length == 0 || $(DNI_ID)[0].value.length < 6) {
-            showModalElement("Profesores", "Necesitas completar dni");
+            showModalElement("Profesores", "Necesitas completar dni", false);
             return false;
         }
         return true;
@@ -368,7 +385,7 @@ var chargeTeacher = (function() {
                     loadTable();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    showModalElement("Profesores", "Error en el pedido de profesores.");
+                    showModalElement("Profesores", "Error en el pedido de profesores.", false);
                     teacherList = JSON.parse(sessionStorage.getItem('profesores'));
                     loadTable();
                 }
@@ -446,9 +463,9 @@ var chargeTeacher = (function() {
             dni : newTeacher.dni,
             degree : newTeacher.degree
         }).then(function() {
-            showModalElement("Profesores", "Profesor creado correctamente");
+            showModalElement("Profesores", "Profesor creado correctamente", false);
         }).catch(function(error) {
-            showModalElement("Profesores", "detectado un error");
+            showModalElement("Profesores", "detectado un error", false);
         });
     }
 
@@ -472,11 +489,10 @@ var chargeTeacher = (function() {
             email : teacherToEdit.email,
             dni : teacherToEdit.dni
         }).then(function() {
-            showModalElement("Profesores", "Profesor editado correctamente");
+            showModalElement("Profesores", "Profesor editado correctamente", true);
         }).catch(function(error) {
-            showModalElement("Profesores", "detectado un error");
+            showModalElement("Profesores", "detectado un error", true);
         });
-        showAndHideForm('none', 'block', ADD_TEACHER);
         teacherIdToEdit = "";
     }
 
@@ -507,7 +523,7 @@ var chargeTeacher = (function() {
     var deleteValue = function(Id) {
         firebase.database().ref(`profesores/${Id}/`).remove()
         .then(function() {
-            showModalElement("Profesores", "Profesor borrado correctamente");
+            showModalElement("Profesores", "Profesor borrado correctamente", false);
             teacherList.forEach(function(teacher, index, object) {
                 if (parseInt(teacher.id) === Id) {
                     object.splice(index, 1);
@@ -515,14 +531,14 @@ var chargeTeacher = (function() {
             });
             loadTable();
         }).catch(function(error) {
-            showModalElement("Profesores", "Se detecto un error");
+            showModalElement("Profesores", "Se detecto un error", false);
         });;
     }
 
     /* LogOut sesion */
     var logout = function(){
         firebase.auth().signOut().then(() => {
-            showModalElement("Profesores", "Cierre de sesion");
+            showModalElement("Profesores", "Cierre de sesion", false);
             window.location = "index.html";
         }).catch((error) => {
             // An error happened.
