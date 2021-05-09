@@ -89,7 +89,7 @@ var chargeCourse = (function() {
     var isEditing;
 
     $(document).ready(function() {
-        init();
+        initStorage();
     });
 
     /* Inicializo mi pantalla */
@@ -100,6 +100,38 @@ var chargeCourse = (function() {
         initTable();
         initExportExcel();
     };
+
+    var initStorage = function(){
+        $.ajax({
+            url: GET_DATA_FIREBASE_URL,
+            success: function() {
+                console.log("Pedido exitoso");
+            },
+            complete: function(data) {
+                sessionStorage.setItem('cursos', JSON.stringify(generateListOfObject(data.responseJSON.cursos)));
+                sessionStorage.setItem('profesores', JSON.stringify(generateListOfObject(data.responseJSON.profesores)));
+                sessionStorage.setItem('alumnos', JSON.stringify(generateListOfObject(data.responseJSON.alumnos)));
+                init();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log("Error en el pedido de info.");
+            }
+        });
+    }
+
+     /* Adherir cursos a la lista */
+     var generateListOfObject = function(data) {
+        var newArray = [];
+        if(data !== null){
+            var map = new Map(Object.entries(data));
+            for (var [id, value] of map){
+                if(value !== null){
+                    newArray.push(value);
+                }
+            } 
+        }
+        return newArray;
+    }
 
     var initNavBar = function(){
         $(SLIDER_NAV_BAR).on('click', function(){
